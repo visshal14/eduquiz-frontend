@@ -1,0 +1,82 @@
+.msg_main {
+
+    height: calc(100% - 150px);
+    border-radius: 10px;
+    background-color: rgb(43, 45, 46);
+    padding: 15px;
+    position: relative;
+
+}
+
+
+
+
+
+.msgs_box {
+    max-height: calc(100% - 100px);
+    height: auto;
+    overflow-y: scroll;
+    position: absolute;
+    bottom: 90px;
+    width: calc(100% - 30px);
+
+}
+
+.msgs_box::-webkit-scrollbar {
+    display: none;
+}
+
+.msg_box {
+    background-color: rgb(27, 26, 29);
+    max-width: 80%;
+    padding: 15px;
+    border-radius: 10px 10px 10px 0;
+    margin-top: 15px;
+}
+
+.nameTime {
+    display: flex;
+    justify-content: space-between;
+}
+
+.msgUser_div {
+    margin-top: 5px;
+}
+
+
+
+
+
+
+.writeMsg_box {
+    width: calc(100% - 40px);
+    background-color: rgb(27, 26, 29);
+    position: absolute;
+    bottom: 15px;
+    height: 50px;
+    border-radius: 5px;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+.writeMsg_box>input {
+    width: 80%;
+    height: 100%;
+    background-color: transparent;
+    padding: 0 5px;
+    color: white;
+    border: transparent;
+    font-size: 15px;
+}
+
+.writeMsg_box>button {
+    background-color: #3f8dfd;
+    border: transparent;
+    border-radius: 5px;
+    padding: 10px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 20px;
+}

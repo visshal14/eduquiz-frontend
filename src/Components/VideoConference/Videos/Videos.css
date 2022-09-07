@@ -1,0 +1,52 @@
+.videos_main {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.bor-r {
+    border: 1px solid red;
+}
+
+.bor-y {
+    border: 1px solid yellow;
+}
+
+/* .top_div {
+    order: 1;
+    width: 80%;
+    height: 100px;
+}
+
+.bottom_div {
+    order: 2;
+    width: 20%;
+    height: 100px;
+} */
+.top_div {
+    order: 2;
+    width: 100%;
+    height: 80%;
+
+}
+
+.bottom_div {
+    order: 1;
+    width: 100%;
+    height: 20%;
+}
+
+.video-thumbnail,
+.video-thumbnail>video {
+    height: 200px;
+    width: 200px;
+}
+
+.myVideo {
+    max-width: 70%;
+    max-height: 70%;
+    height: auto;
+    width: auto;
+    border-radius: 20px;
+}

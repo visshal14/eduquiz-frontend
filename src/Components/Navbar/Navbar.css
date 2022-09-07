@@ -1,0 +1,36 @@
+.nav_main_div {
+    width: calc(100% - 62px);
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 30px;
+    position: fixed;
+    top: 0;
+    z-index: 3;
+}
+
+.bor {
+    border: 1px solid black;
+}
+
+.nav_logo>a {
+    font-size: 30px;
+    text-decoration: none;
+    color: black;
+}
+
+.nav_list_main>ul {
+    display: flex;
+    align-items: center;
+}
+
+.nav_list_main>ul>li {
+    margin: 0 10px;
+    list-style-type: none;
+}
+
+.nav_list_main>ul>li>a {
+    text-decoration: none;
+    color: black;
+}

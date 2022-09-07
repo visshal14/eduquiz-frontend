@@ -1,0 +1,110 @@
+/* .nav_logo>a {
+    font-size: 30px;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+}
+
+.nav_list_main>ul>li>a {
+    text-decoration: none;
+    color: white;
+} */
+
+
+.vc_main {
+    background-color: rgb(27, 26, 29);
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    color: white;
+}
+
+.vc_left {
+    width: 80%;
+    position: relative;
+    padding: 80px 30px;
+}
+
+.videos_div {
+    width: 100%;
+    height: calc(100% - 30px);
+
+}
+
+
+
+.navigation_div {
+    padding: 10px 0;
+    display: flex;
+    justify-content: space-between;
+    position: absolute;
+    bottom: 30px;
+    width: calc(100% - 60px);
+}
+
+.room_id {
+    display: flex;
+    align-items: center;
+
+    background-color: rgb(39, 41, 43);
+    padding: 15px 30px;
+    border-radius: 10px;
+}
+
+.room_idCopy {
+    padding: 0 10px !important;
+    border-left: 1px solid white;
+    margin-left: 10px;
+    cursor: pointer;
+}
+
+.leave_btn {
+    display: flex;
+    align-items: center;
+
+
+    padding: 15px 30px;
+    border-radius: 10px;
+    background-color: #d95240;
+}
+
+.navigation_btn>button {
+    background-color: #27292b;
+    border: transparent;
+    border-radius: 10px;
+    padding: 15px 17px;
+    color: white;
+    margin: 0 8px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.vc_Right {
+    width: 25%;
+    padding: 80px 15px 30px 15px;
+    height: 100%;
+}
+
+.copyToolTip {
+    background-color: #3f8dfd;
+    width: max-content;
+    padding: 15px;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    transform: translate(-0%, -100%);
+}
+
+.copyToolTipArrow {
+    position: absolute;
+    bottom: -40%;
+    transform: translate(200%, 0%);
+    border: 10px solid transparent;
+    border-top-color: #3f8dfd;
+
+}
+
+
+.video-thumbnail {
+    height: 100px;
+}

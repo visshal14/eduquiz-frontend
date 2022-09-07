@@ -1,0 +1,81 @@
+.room_main {
+
+    background-image: linear-gradient(to right, #B08FB1, #1D76FD);
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100vh;
+    width: 100%;
+    overflow-x: hidden;
+    display: flex;
+}
+
+.room-partition {
+    width: 50%;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px
+}
+
+#roomJoiningBack {
+    width: 100%;
+    height: auto;
+    border-radius: 20px;
+}
+
+
+.createJoinRoom-div {
+    background-color: white;
+    width: 400px;
+    border-radius: 20px;
+    font-size: 25px;
+}
+
+.createJoinRoom-heading {
+    background-color: #E9DBFF;
+    border-radius: 20px 20px 0 0;
+    padding: 10px;
+    font-size: 30px;
+    text-align: center;
+}
+
+.createJoinRoom-id {
+    margin-top: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.createJoinRoom-unique-id {
+    margin-top: 30px;
+    font-weight: 700;
+    border: 1px solid black;
+    padding: 5px 20px;
+
+}
+
+.createJoinRoom-id>input,
+.createJoinRoom-joinPass>input {
+    font-size: 25px;
+    padding: 2px 10px;
+    border: 1px solid black;
+    margin-bottom: 20px;
+
+}
+
+.continueBtn {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 25px;
+    padding: 15px 100px;
+    border-radius: 505px;
+    border: transparent;
+    background-color: #E9DBFF;
+    margin: 5px;
+    width: auto;
+    white-space: nowrap;
+    text-align: center;
+
+}
