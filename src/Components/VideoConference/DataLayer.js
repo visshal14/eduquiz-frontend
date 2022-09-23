@@ -12,75 +12,17 @@ const socket = io.connect("http://localhost:3001", {
 export const DataLayerContext = createContext()
 
 
-
-
 export const DataLayer = ({ children }) => {
 
     const [state, dispatch] = useReducer(reducer, initialState)
     const [myStream, setMyStream] = useState();
     const [myPeer, setMyPeer] = useState()
-    const [remotePeers, setRemotePeers] = useState([])
+    const [remoteStreams, setRemoteStreams] = useState([])
 
     const myVideo = useRef()
-    const remotePeersRef = useRef()
-    // const remoteRef = useRef([])
+    const remotePeersRef = useRef([])
+
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
-
-    useEffect(() => {
-        myPeer?.on("open", (id) => {
-            console.log("My peer: ", id)
-            socket.emit("join-roomF", state.roomId, id)
-        })
-        if (myPeer) {
-            getUserMedia({ audio: true, video: true },
-                function (stream) {
-                    const newTrack = black()
-                    const dummyAudioTrack = silence()
-                    stream.addTrack(newTrack)
-                    stream.addTrack(dummyAudioTrack)
-                    setMyStream(stream)
-                    console.log("myStream: ", stream)
-                    myVideo.current.srcObject = stream
-                    if (myStream) myStream.getTracks()[2].enabled = false
-
-
-
-                    myPeer?.on("call", (call) => {
-
-                        call.answer(stream)
-                        let id;
-                        call.on("stream", (userVideoStream) => {
-
-                            if (id !== userVideoStream) {
-                                id = userVideoStream
-                                console.log("53 call  ", userVideoStream)
-                                // remotePeersRef.current.srcObject = userVideoStream
-
-
-                                setRemotePeers(remotePeers => [...remotePeers, userVideoStream])
-
-                            }
-                        })
-                    })
-
-
-
-                    socket.on("user-connectedF", (remotePeerId,) => {
-                        setTimeout(connectToNewUser, 1000, remotePeerId, stream, state.roomId)
-                    })
-
-
-
-
-                }, function (err) {
-                    console.log(err)
-                })
-
-
-        }
-
-    }, [myPeer])
 
     useEffect(() => {
         const peer = new Peer(undefined, {
@@ -92,84 +34,77 @@ export const DataLayer = ({ children }) => {
             config: peerServerList
         })
         setMyPeer(peer)
-        socket.on("port", (e) => {
-            console.log(e)
-        })
-        // getUserMedia({ audio: true, video: true },
-        //     function (stream) {
-        //         // console.log(black())
-        //         const newTrack = black()
-        //         const dummyAudioTrack = silence()
-        //         // const newTrack = stream.getTracks()[0].clone()
-        //         // console.log(newTrack)
-        //         // newTrack.kind = "video"
-        //         // console.log(newTrack)
-        //         stream.addTrack(newTrack)
-        //         stream.addTrack(dummyAudioTrack)
-        //         setMyStream(stream)
-        //         myVideo.current.srcObject = stream
-        //         // console.log(myVideo)
-        //         // myStream.getTracks()[2].enabled = false
-        //         // checkPeerId(myVideo, myStream, myName, micStatus)
-
-
-        //         myPeer.on("call", (call) => {
-
-        //             // revCall.push(call)
-
-        //             // call.answer(stream)
-
-
-        //             // const video = document.createElement("video")
-        //             let id;
-        //             call.on("stream", (userVideoStream) => {
-
-
-
-        //                 if (id !== userVideoStream) {
-        //                     id = userVideoStream
-
-
-        //                     // addUserStream(video, userVideoStream, call.metadata.id, call.metadata.name, call.metadata.micStatus, call.metadata.screenShareOn)
-
-        //                 }
-
-        //                 // addUserStream(video, userVideoStream)
-        //             })
-        //         })
-
-
-
-        //         socket.on("user-connectedF", (remotePeerId,) => {
-        //             // console.log("user Connected  ", remotePeerId)
-        //             setTimeout(connectToNewUser, 1000, remotePeerId, stream)
-        //         })
-
-
-        //     }, function (err) {
-        //         console.log(err)
-        //     })
-        // eslint-disable-next-line 
+        // updateMyPeer(peer)
+        // socket.on("port", (e) => {
+        //     console.log(e)
+        // })
     }, [])
+    useEffect(() => {
+        myPeer?.on("open", (id) => {
+            updateMyPeer(id)
+            console.log("My peer: ", id)
+            socket.emit("join-roomF", state.roomId, id, state.userName)
+        })
+        if (myPeer) {
+            getUserMedia({ audio: true, video: true },
+                function (stream) {
+                    const newTrack = black()
+                    const dummyAudioTrack = silence()
+                    stream.addTrack(newTrack)
+                    stream.addTrack(dummyAudioTrack)
+                    setMyStream(stream)
+                    myVideo.current.srcObject = stream
+                    if (myStream) myStream.getTracks()[2].enabled = false
 
-    function connectToNewUser(userId, stream, roomId) {
-        console.log("in connectToNewUser", stream)
-        console.log(roomId, "     ", userId)
-        // let call = myPeer.call(userId, stream, { metadata: { "name": myName, "id": peerIDMain, micStatus, screenShareOn } })
-        let call = myPeer?.call(userId, stream)
-        // const call = myPeer?.call(userId, stream
-        //     , { metadata: { "name": myName, "id": peerIDMain, micStatus, screenShareOn } }
-        // )
+
+                    myPeer?.on("call", (call) => {
+                        call.answer(stream)
+                        let id;
+                        call.on("stream", (userVideoStream) => {
+                            if (id !== userVideoStream) {
+                                id = userVideoStream
+                                remotePeersRef.current.push(userVideoStream)
+
+                                setRemoteStreams(remoteStreams => [...remoteStreams, { "stream": userVideoStream, "id": call.metadata.tempPeer, "name": call.metadata.tempName, "micStatus": call.metadata.myMic }])
+                            }
+                        })
+                    })
+                    myPeer?.on("close", () => {
+
+                        socket.emit("user-disconnect", myPeer?._id)
+                    })
+
+                    socket.on("user-connectedF", (remotePeerId, remotePeerName) => {
+                        setTimeout(connectToNewUser, 3000, remotePeerId, stream, state.roomId, remotePeerName, state.myPeer)
+                    })
+
+                }, function (err) {
+                    console.log(err)
+                })
+
+
+        }
+
+    }, [myPeer])
+
+
+    function connectToNewUser(userId, stream, roomId, remoteName) {
+
+
+        const tempName = state.userName
+        const tempPeer = myPeer?._id
+        const myMic = state.micStatus
+        let call = myPeer?.call(userId, stream, { metadata: { tempName, tempPeer, myMic } })
         let id;
         call?.on("stream", (userVideoStream) => {
 
             if (id !== userVideoStream) {
                 id = userVideoStream;
-                console.log("uservideoStream 168")
+
+                remotePeersRef.current.push(userVideoStream)
                 // remotePeersRef.srcObject = userVideoStream
-                setRemotePeers(remotePeers => [...remotePeers, userVideoStream])
-                // setRemotePeers(remotePeers => [...remotePeers, stream])
-                // addUserStream(video, userVideoStream, userId, userName, micStatus = true, screenShareOnS)
+                setRemoteStreams(remoteStreams => [...remoteStreams, { "stream": userVideoStream, "id": userId, "name": remoteName, "micStatus": "on" }])
+
             }
 
 
@@ -179,6 +114,7 @@ export const DataLayer = ({ children }) => {
         })
         call?.on("close", () => {
             console.log("close")
+            socket.emit("user-disconnect", userId)
             // try {
             //     if (document.getElementById(userId)) {
             //         document.getElementById(userId).remove()
@@ -196,7 +132,12 @@ export const DataLayer = ({ children }) => {
 
 
 
-
+    const updateMyPeer = (peer) => {
+        dispatch({
+            type: "SET_PEER",
+            peer: peer
+        })
+    }
 
     const updateNameReducer = (name) => {
         dispatch({
@@ -226,20 +167,63 @@ export const DataLayer = ({ children }) => {
 
         socket.emit("msgThoughSocket", (chat))
     }
+    const updateIsScreenShare = (data) => {
 
+        dispatch({
+            type: "SET_SCREENSHARE",
+            screenShare: data
+        })
+    }
+    const updateMicStatus = (data) => {
+        dispatch({
+            type: "SET_MICSTATUS",
+            mic: data
+        })
+    }
+
+    socket.on("user-disconnect", (id) => {
+        console.log(id)
+    })
+    const socketMicOnOff = (position) => {
+        socket.emit("userMicToServer", position, state.myPeer)
+
+        const audioTrack = myStream?.getTracks().find(track => track.kind === "audio")
+        if (audioTrack?.enabled) {
+            audioTrack.enabled = false;
+        } else {
+            if (audioTrack) {
+                audioTrack.enabled = true;
+            }
+        }
+
+
+
+    }
+    socket.on("userMicToClient", (position, peerId) => {
+
+        setRemoteStreams(remoteStreams.map(item =>
+            (item.id === peerId) ? { ...item, micStatus: position } : item
+        ))
+    })
 
     const value = {
         remotePeersRef,
-        remotePeers,
+        remoteStreams,
         myStream,
         myVideo,
         msgDisplay: state.msgDisplay,
         userName: state.userName,
+        isScreenShare: state.isScreenShare,
         socketOtherChat,
+        myPeerId: state.myPeer,
+        micStatus: state.micStatus,
         updateMsgDisplayReducer,
         updateNameReducer,
         updateRoomIdReducer,
-        msgSentThoughtSocket
+        msgSentThoughtSocket,
+        updateIsScreenShare,
+        socketMicOnOff,
+        updateMicStatus
     }
 
 

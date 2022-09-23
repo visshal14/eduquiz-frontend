@@ -1,10 +1,11 @@
 export const initialState = {
     userName: "",
     msgDisplay: "",
-    roomId: ""
-    // playlists:null,
-    //   Remove after developing
-    // token: "BQCJh6Hm2jZrv74v6BDGQCv7m78zjZPzgkkbv1WwRQymXxxaOPmLKGpn6dSzOHjirB3sNcVkr41zsIsMVIL_KobNHpYqPr3Y0cQyy4B9WXZkQeI4FtBfr1b4eBHnpXtfbM-dwjpnoe22jgZkccaV-maw9dHxyvn4C1Wp8SPwt3TnV1XH",
+    roomId: "",
+    myPeer: "",
+    isScreenShare: false,
+    micStatus: "on"
+
 };
 
 const reducer = (state, action) => {
@@ -26,6 +27,21 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 roomId: action.roomId
+            }
+        case "SET_PEER":
+            return {
+                ...state,
+                myPeer: action.peer
+            }
+        case "SET_SCREENSHARE":
+            return {
+                ...state,
+                isScreenShare: action.screenShare
+            }
+        case "SET_MICSTATUS":
+            return {
+                ...state,
+                micStatus: action.mic
             }
         default:
             return state;

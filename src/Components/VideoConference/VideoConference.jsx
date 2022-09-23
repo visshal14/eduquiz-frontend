@@ -12,21 +12,29 @@ function VideoConference() {
     LoginChecker(-1)
     const { id, status } = useParams()
 
-    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer } = useDataLayerValue()
+    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus } = useDataLayerValue()
 
     const [copyToolTipDis, setCopyToolTipDis] = useState("none")
-    const [micOnOff, setMicOff] = useState("off")
+    // const [micOnOff, setMicOff] = useState("off")
     const [camOnOff, setCamOnOff] = useState("off")
     const [screenShareOnOff, setScreenShareOnOff] = useState("off")
     const [msgDis, setMsgDis] = useState("none")
 
+    useEffect(() => {
+        if (screenShareOnOff === "off") {
+            updateIsScreenShare(false)
+        } else {
+            updateIsScreenShare(true)
+
+        }
+    }, [screenShareOnOff])
     useEffect(() => {
         axios.get(`/getUserName`, { headers: { "Authorization": `Bearer ${window.localStorage.getItem("accessToken")}` } })
             .then(function (response) {
                 updateNameReducer(response.data)
                 window.localStorage.setItem("userName", response.data)
             });
-
+        updateNameReducer(window.localStorage.getItem("userName"))
         UserVerificationRoom(id, status)
         updateRoomIdReducer(id)
         // eslint-disable-next-line
@@ -42,12 +50,18 @@ function VideoConference() {
         position: "relative",
         padding: "80px 30px",
     }
+    const micOnOffFunction = () => {
+        micStatus === "off" ? updateMicStatus("on") : updateMicStatus("off")
 
+    }
+    useEffect(() => {
+        socketMicOnOff(micStatus)
+    }, [micStatus])
     return (
         <div className='vc_main'>
             <div style={vc_left}>
                 <div className='videos_div'>
-                    <Videos />
+                    <Videos micStatus={micStatus} camStatus={camOnOff} />
                 </div>
                 <div className='navigation_div'>
                     <div className='room_id'>
@@ -66,9 +80,9 @@ function VideoConference() {
 
                     </div>
                     <div className='navigation_btn'>
-                        <button style={{ backgroundColor: (micOnOff === "off") ? "#d95240" : "#27292b" }}
-                            onClick={() => (micOnOff === "off") ? setMicOff("on") : setMicOff("off")} type="button">
-                            {(micOnOff === "on") ? <MicNoneOutlined /> : <MicOffOutlined />}
+                        <button style={{ backgroundColor: (micStatus === "off") ? "#d95240" : "#27292b" }}
+                            onClick={micOnOffFunction} type="button">
+                            {(micStatus === "on") ? <MicNoneOutlined /> : <MicOffOutlined />}
                         </button>
                         <button style={{ backgroundColor: (camOnOff === "off") ? "#d95240" : "#27292b" }}
                             onClick={() => (camOnOff === "off") ? setCamOnOff("on") : setCamOnOff("off")} type="button">
