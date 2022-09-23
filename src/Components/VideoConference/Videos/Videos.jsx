@@ -216,6 +216,7 @@ const RemoteVideoThumbnail = ({ id, remotePeer }) => {
     const tempRef = useRef(null)
     useEffect(() => {
         if (tempRef) tempRef.current.srcObject = remotePeer
+        //comment
         // eslint-disable-next-line
     }, [])
     return (
