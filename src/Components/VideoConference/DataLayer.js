@@ -26,7 +26,7 @@ export const DataLayer = ({ children }) => {
 
     useEffect(() => {
         const peer = new Peer(undefined, {
-            path: "/",
+            path: "/peerjs",
             host: "eduquiz001.herokuapp.com",
             // port: "3001",
             port: "443",
