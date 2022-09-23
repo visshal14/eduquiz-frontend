@@ -2,7 +2,7 @@ import React, { useState, createContext, useContext, useEffect, useReducer, useR
 import reducer, { initialState } from './reducer';
 import { Peer } from "peerjs";
 import { io } from "socket.io-client";
-const socket = io.connect("http://localhost:3001", {
+const socket = io.connect("https://eduquiz001.herokuapp.com", {
     forceNew: true,
     transports: ["polling"],
 });
@@ -27,10 +27,10 @@ export const DataLayer = ({ children }) => {
     useEffect(() => {
         const peer = new Peer(undefined, {
             path: "/peerjs",
-            host: "localhost",
-            port: "3001",
-            // port: "443",
-            // secure: true,
+            host: "https://eduquiz001.herokuapp.com",
+            // port: "3001",
+            port: "443",
+            secure: true,
             config: peerServerList
         })
         setMyPeer(peer)
