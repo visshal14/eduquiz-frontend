@@ -12,11 +12,11 @@ function VideoConference() {
     LoginChecker(-1)
     const { id, status } = useParams()
 
-    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus } = useDataLayerValue()
+    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camOnOffToSocket } = useDataLayerValue()
 
     const [copyToolTipDis, setCopyToolTipDis] = useState("none")
     // const [micOnOff, setMicOff] = useState("off")
-    const [camOnOff, setCamOnOff] = useState("off")
+    const [camOnOff, setCamOnOff] = useState("on")
     const [screenShareOnOff, setScreenShareOnOff] = useState("off")
     const [msgDis, setMsgDis] = useState("none")
 
@@ -54,9 +54,16 @@ function VideoConference() {
         micStatus === "off" ? updateMicStatus("on") : updateMicStatus("off")
 
     }
+
     useEffect(() => {
         socketMicOnOff(micStatus)
     }, [micStatus])
+    const camOnOffFunction = () => {
+        camOnOff === "off" ? setCamOnOff("on") : setCamOnOff("off")
+    }
+    useEffect(() => {
+        camOnOffToSocket()
+    }, [camOnOff])
     return (
         <div className='vc_main'>
             <div style={vc_left}>
@@ -85,7 +92,7 @@ function VideoConference() {
                             {(micStatus === "on") ? <MicNoneOutlined /> : <MicOffOutlined />}
                         </button>
                         <button style={{ backgroundColor: (camOnOff === "off") ? "#d95240" : "#27292b" }}
-                            onClick={() => (camOnOff === "off") ? setCamOnOff("on") : setCamOnOff("off")} type="button">
+                            onClick={camOnOffFunction} type="button">
                             {(camOnOff === "on") ? <VideocamOutlined /> : <VideocamOffOutlined />}
                         </button>
                         <button style={{ backgroundColor: (screenShareOnOff === "off") ? "#d95240" : "#27292b" }}

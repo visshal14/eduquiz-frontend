@@ -2,6 +2,11 @@ import React, { useState, createContext, useContext, useEffect, useReducer, useR
 import reducer, { initialState } from './reducer';
 import { Peer } from "peerjs";
 import { io } from "socket.io-client";
+// const socket = io.connect("http://localhost:3001")
+// const socket = io.connect("http://localhost:3001", {
+//     forceNew: true,
+//     transports: ["polling"],
+// });
 const socket = io.connect("https://eduquiz001.herokuapp.com", {
     // forceNew: true,
     // transports: ["polling"],
@@ -23,14 +28,14 @@ export const DataLayer = ({ children }) => {
     const remotePeersRef = useRef([])
 
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
     useEffect(() => {
         const peer = new Peer(undefined, {
             path: "/peerjs",
-            host: "eduquiz001.herokuapp.com",
-            // port: "3001",
-            port: "443",
-            secure: true,
+            host: "localhost",
+            port: "3001",
+            //  host: "eduquiz001.herokuapp.com",
+            // port: "443",
+            // secure: true,
             config: peerServerList
         })
         setMyPeer(peer)
@@ -39,6 +44,7 @@ export const DataLayer = ({ children }) => {
         //     console.log(e)
         // })
     }, [])
+    const [answers, setAnswers] = useState([])
     useEffect(() => {
         myPeer?.on("open", (id) => {
             updateMyPeer(id)
@@ -58,6 +64,9 @@ export const DataLayer = ({ children }) => {
 
 
                     myPeer?.on("call", (call) => {
+
+                        setAnswers(answers => [...answers, call])
+
                         call.answer(stream)
                         let id;
                         call.on("stream", (userVideoStream) => {
@@ -87,7 +96,7 @@ export const DataLayer = ({ children }) => {
 
     }, [myPeer])
 
-
+    const [callers, setCallers] = useState([])
     function connectToNewUser(userId, stream, roomId, remoteName) {
 
 
@@ -95,6 +104,7 @@ export const DataLayer = ({ children }) => {
         const tempPeer = myPeer?._id
         const myMic = state.micStatus
         let call = myPeer?.call(userId, stream, { metadata: { tempName, tempPeer, myMic } })
+        setCallers(callers => [...callers, call])
         let id;
         call?.on("stream", (userVideoStream) => {
 
@@ -180,13 +190,22 @@ export const DataLayer = ({ children }) => {
             mic: data
         })
     }
+    const [tempRemoteStream, setTempRemoteStream] = useState()
+    socket.on("user-disconnect", (userId) => {
 
-    socket.on("user-disconnect", (id) => {
-        console.log(id)
+        try {
+            if (document.getElementById(userId)) {
+                document.getElementById(userId).remove()
+            }
+            setTempRemoteStream(tempRemoteStream.filter(item => item.id !== userId))
+        } catch (e) { }
     })
+    useEffect(() => {
+        setTempRemoteStream(remoteStreams)
+    }, [remoteStreams])
+
     const socketMicOnOff = (position) => {
         socket.emit("userMicToServer", position, state.myPeer)
-
         const audioTrack = myStream?.getTracks().find(track => track.kind === "audio")
         if (audioTrack?.enabled) {
             audioTrack.enabled = false;
@@ -195,17 +214,65 @@ export const DataLayer = ({ children }) => {
                 audioTrack.enabled = true;
             }
         }
-
-
-
     }
     socket.on("userMicToClient", (position, peerId) => {
-
         setRemoteStreams(remoteStreams.map(item =>
             (item.id === peerId) ? { ...item, micStatus: position } : item
         ))
     })
+    const newVideo = () => {
 
+        try {
+            getUserMedia({ video: true },
+                function (stream) {
+                    myStream?.removeTrack(myStream.getAudioTracks()[1])
+                    myStream?.getTracks().forEach(track => {
+                        if (track.kind === "video") {
+                            myStream.removeTrack(track)
+                        }
+                    })
+                    myStream?.addTrack(silence())
+                    myStream?.addTrack(stream.getVideoTracks()[0])
+                    myStream?.addTrack(black())
+
+                    callers?.forEach(call => {
+
+                        call.peerConnection.getSenders()[2].replaceTrack(stream.getVideoTracks()[0])
+                    })
+                    answers?.forEach(call => call.peerConnection.getSenders()[2].replaceTrack(stream.getVideoTracks()[0]))
+                })
+        } catch (e) {
+            console.log(e)
+        }
+
+    }
+    const camOnOffToSocket = () => {
+
+        try {
+            const videoTrack = myStream?.getTracks()?.find(track => track.kind === "video")
+
+            if (videoTrack?.enabled) {
+                videoTrack.enabled = false;
+                videoTrack.stop()
+                callers.forEach(call => call.peerConnection.getSenders()[2].replaceTrack(black()))
+                answers.forEach(call => call.peerConnection.getSenders()[2].replaceTrack(black()))
+            } else {
+                // console.log("else")
+                newVideo()
+                if (videoTrack) {
+                    videoTrack.enabled = true;
+                }
+
+
+            }
+        } catch (e) {
+            console.log(e)
+        }
+
+
+
+
+    }
     const value = {
         remotePeersRef,
         remoteStreams,
@@ -223,7 +290,8 @@ export const DataLayer = ({ children }) => {
         msgSentThoughtSocket,
         updateIsScreenShare,
         socketMicOnOff,
-        updateMicStatus
+        updateMicStatus,
+        camOnOffToSocket
     }
 
 
