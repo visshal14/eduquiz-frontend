@@ -31,11 +31,11 @@ export const DataLayer = ({ children }) => {
     useEffect(() => {
         const peer = new Peer(undefined, {
             path: "/peerjs",
-            host: "localhost",
-            port: "3001",
-            //  host: "eduquiz001.herokuapp.com",
-            // port: "443",
-            // secure: true,
+            // host: "localhost",
+            // port: "3001",
+            host: "eduquiz001.herokuapp.com",
+            port: "443",
+            secure: true,
             config: peerServerList
         })
         setMyPeer(peer)
