@@ -4,16 +4,21 @@ export const initialState = {
     roomId: "",
     myPeer: "",
     isScreenShare: false,
-    micStatus: "on"
-
+    micStatus: "on",
+    camStatus: "on",
+    myScreenShare: false
 };
 
 const reducer = (state, action) => {
 
 
     switch (action.type) {
+        case "SET_PEER":
+            return {
+                ...state,
+                myPeer: action.peer
+            }
         case "SET_NAME":
-
             return {
                 ...state,
                 userName: action.userName,
@@ -28,11 +33,7 @@ const reducer = (state, action) => {
                 ...state,
                 roomId: action.roomId
             }
-        case "SET_PEER":
-            return {
-                ...state,
-                myPeer: action.peer
-            }
+
         case "SET_SCREENSHARE":
             return {
                 ...state,
@@ -42,6 +43,21 @@ const reducer = (state, action) => {
             return {
                 ...state,
                 micStatus: action.mic
+            }
+        case "SET_CAMSTATUS":
+            return {
+                ...state,
+                camStatus: action.mic
+            }
+        // case "SET_SCREENSTATUS":
+        //     return {
+        //         ...state,
+        //         isScreenShare: action.screen
+        //     }
+        case "SET_MYSCREEN":
+            return {
+                ...state,
+                myScreenShare: action.screen
             }
         default:
             return state;

@@ -12,22 +12,18 @@ function VideoConference() {
     LoginChecker(-1)
     const { id, status } = useParams()
 
-    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camOnOffToSocket } = useDataLayerValue()
+    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camStatus, updateCamStatus, camOnOffToSocket, updateMyScreenShareStatus, btnScreenShare } = useDataLayerValue()
 
     const [copyToolTipDis, setCopyToolTipDis] = useState("none")
     // const [micOnOff, setMicOff] = useState("off")
-    const [camOnOff, setCamOnOff] = useState("on")
+    // const [camOnOff, setCamOnOff] = useState("on")
     const [screenShareOnOff, setScreenShareOnOff] = useState("off")
     const [msgDis, setMsgDis] = useState("none")
 
-    useEffect(() => {
-        if (screenShareOnOff === "off") {
-            updateIsScreenShare(false)
-        } else {
-            updateIsScreenShare(true)
 
-        }
-    }, [screenShareOnOff])
+
+
+
     useEffect(() => {
         axios.get(`/getUserName`, { headers: { "Authorization": `Bearer ${window.localStorage.getItem("accessToken")}` } })
             .then(function (response) {
@@ -50,25 +46,40 @@ function VideoConference() {
         position: "relative",
         padding: "80px 30px",
     }
-    const micOnOffFunction = () => {
-        micStatus === "off" ? updateMicStatus("on") : updateMicStatus("off")
-
-    }
-
+    // const micOnOffFunction = () => {
+    //     micStatus === "off" ? updateMicStatus("on") : updateMicStatus("off")
+    // }
     useEffect(() => {
         socketMicOnOff(micStatus)
     }, [micStatus])
-    const camOnOffFunction = () => {
-        camOnOff === "off" ? setCamOnOff("on") : setCamOnOff("off")
-    }
     useEffect(() => {
         camOnOffToSocket()
-    }, [camOnOff])
+    }, [camStatus])
+    useEffect(() => {
+
+        if (screenShareOnOff === "off") {
+            updateIsScreenShare(false)
+            updateMyScreenShareStatus(false)
+        } else {
+            updateIsScreenShare(true)
+            updateMyScreenShareStatus(true)
+
+        }
+    }, [screenShareOnOff])
+
+    const screenShareBtnMain = () => {
+        screenShareOnOff === "off" ? setScreenShareOnOff("on") : setScreenShareOnOff("off")
+        btnScreenShare()
+    }
+    // const camOnOffFunction = () => {
+    //     camOnOff === "off" ? setCamOnOff("on") : setCamOnOff("off")
+    // }
+
     return (
         <div className='vc_main'>
             <div style={vc_left}>
                 <div className='videos_div'>
-                    <Videos micStatus={micStatus} camStatus={camOnOff} />
+                    <Videos micStatus={micStatus} camStatus={camStatus} />
                 </div>
                 <div className='navigation_div'>
                     <div className='room_id'>
@@ -88,15 +99,15 @@ function VideoConference() {
                     </div>
                     <div className='navigation_btn'>
                         <button style={{ backgroundColor: (micStatus === "off") ? "#d95240" : "#27292b" }}
-                            onClick={micOnOffFunction} type="button">
+                            onClick={() => (micStatus === "off") ? updateMicStatus("on") : updateMicStatus("off")} type="button">
                             {(micStatus === "on") ? <MicNoneOutlined /> : <MicOffOutlined />}
                         </button>
-                        <button style={{ backgroundColor: (camOnOff === "off") ? "#d95240" : "#27292b" }}
-                            onClick={camOnOffFunction} type="button">
-                            {(camOnOff === "on") ? <VideocamOutlined /> : <VideocamOffOutlined />}
+                        <button style={{ backgroundColor: (camStatus === "off") ? "#d95240" : "#27292b" }}
+                            onClick={() => (camStatus === "off") ? updateCamStatus("on") : updateCamStatus("off")} type="button">
+                            {(camStatus === "on") ? <VideocamOutlined /> : <VideocamOffOutlined />}
                         </button>
                         <button style={{ backgroundColor: (screenShareOnOff === "off") ? "#d95240" : "#27292b" }}
-                            onClick={() => (screenShareOnOff === "off") ? setScreenShareOnOff("on") : setScreenShareOnOff("off")} type="button">
+                            onClick={screenShareBtnMain} type="button">
                             {(screenShareOnOff === "on") ? <ScreenShareOutlined /> : <StopScreenShareOutlined />}
                         </button>
                         <button style={{ backgroundColor: (msgDis === "none") ? "#27292b" : "#3f8dfd" }}

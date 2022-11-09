@@ -3,7 +3,7 @@ import "./Videos.css"
 import { MicNoneOutlined, MicOffOutlined } from "@mui/icons-material"
 import { useDataLayerValue } from "../DataLayer"
 function Videos({ micStatus, camStatus }) {
-    const { msgDisplay, userName, myPeerId, myVideo, remoteStreams, remotePeersRef, isScreenShare } = useDataLayerValue()
+    const { msgDisplay, userName, myPeerId, myVideo, remoteStreams, remotePeersRef, isScreenShare, screenRef } = useDataLayerValue()
     const [topDivStyle, setTopDivStyle] = useState({
         order: "",
         width: "",
@@ -117,16 +117,18 @@ function Videos({ micStatus, camStatus }) {
 
         if (isScreenShare) {
             let alluser = document.getElementById("all_usersDiv")
+            document.getElementById("all_usersDiv").remove()
             document.getElementById("bottom_div").appendChild(alluser)
-            document.getElementById("top_div").innerHTML = ""
+            // document.getElementById("top_div").innerHTML = ""
             for (let i = 0; i < document.getElementsByClassName("videoThumbnail").length; i++) {
                 document.getElementsByClassName("videoThumbnail")[i].style.maxWidth = "100%"
             }
 
         } else {
             let alluser = document.getElementById("all_usersDiv")
-            document.getElementById("top_div").appendChild(alluser)
             document.getElementById("bottom_div").innerHTML = ""
+            document.getElementById("top_div").appendChild(alluser)
+
             for (let i = 0; i < document.getElementsByClassName("videoThumbnail").length; i++) {
                 document.getElementsByClassName("videoThumbnail")[i].style.maxWidth = "70%"
             }
@@ -155,7 +157,7 @@ function Videos({ micStatus, camStatus }) {
                 myVideoDiv[i].style.width = "30%"
                 myVideoDiv[i].style.height = "30%"
             }
-            console.log("103 3")
+            // console.log("103 3")
             //30% 30%
         } else {
             if (!isScreenShare) {
@@ -186,6 +188,7 @@ function Videos({ micStatus, camStatus }) {
 
             // 25%
         }
+        // eslint-disable-next-line
     }, [remoteStreams, isScreenShare])
 
 
@@ -194,6 +197,10 @@ function Videos({ micStatus, camStatus }) {
     return (
         <div className='videos_main'>
             <div id="top_div" style={top_div} className="bor-r">
+
+                {(isScreenShare === true) ? <ScreenShareThumbnail scrRef={screenRef} id={myPeerId} /> : ""}
+                {/* <ScreenShareThumbnail scrRef={screenRef} id={myPeerId} /> */}
+
                 <div id="all_usersDiv" className='all-users'>
                     <VideoThumbnail videoRef={myVideo} name={userName} id={myPeerId} micStatus={micStatus} camStatus={camStatus} />
                     {remoteStreams.map((peer, i) => (
@@ -208,15 +215,27 @@ function Videos({ micStatus, camStatus }) {
     )
 }
 
+const ScreenShareThumbnail = ({ scrRef, id }) => {
+    // console.log(scrRef)
+    // console.log(id)
+    return (
+        <div className='screen-share-div' id={id + "-screen"}>
+            <video playsInline muted ref={scrRef} autoPlay />
+            {/* <p>{name}</p> */}
+            {/* <span className='myMicSpan'>{(micStatus === "on") ? <MicNoneOutlined /> : <MicOffOutlined />}</span> */}
+        </div>
+    )
+}
 
 const remotePeerClick = () => {
     console.log("remote click")
 }
 const RemoteVideoThumbnail = ({ id, remotePeer }) => {
+
     const tempRef = useRef(null)
     useEffect(() => {
         if (tempRef) tempRef.current.srcObject = remotePeer
-        //comment
+
         // eslint-disable-next-line
     }, [])
     return (

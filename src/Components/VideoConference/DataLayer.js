@@ -2,7 +2,9 @@ import React, { useState, createContext, useContext, useEffect, useReducer, useR
 import reducer, { initialState } from './reducer';
 import { Peer } from "peerjs";
 import { io } from "socket.io-client";
-// const socket = io.connect("http://localhost:3001")
+
+
+
 // const socket = io.connect("http://localhost:3001", {
 //     forceNew: true,
 //     transports: ["polling"],
@@ -26,7 +28,7 @@ export const DataLayer = ({ children }) => {
 
     const myVideo = useRef()
     const remotePeersRef = useRef([])
-
+    const screenRef = useRef()
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     useEffect(() => {
         const peer = new Peer(undefined, {
@@ -84,7 +86,8 @@ export const DataLayer = ({ children }) => {
                     })
 
                     socket.on("user-connectedF", (remotePeerId, remotePeerName) => {
-                        setTimeout(connectToNewUser, 3000, remotePeerId, stream, state.roomId, remotePeerName, state.myPeer)
+                        // console.log(remotePeerId)
+                        setTimeout(connectToNewUser, 2000, remotePeerId, stream, state.roomId, remotePeerName, state.myPeer)
                     })
 
                 }, function (err) {
@@ -93,7 +96,7 @@ export const DataLayer = ({ children }) => {
 
 
         }
-
+        // eslint-disable-next-line
     }, [myPeer])
 
     const [callers, setCallers] = useState([])
@@ -167,32 +170,211 @@ export const DataLayer = ({ children }) => {
             roomId: roomId
         })
     }
-    const [socketOtherChat, setSocketOtherChat] = useState()
-
-    socket.on("msgSent", (chat) => {
-
-        setSocketOtherChat(chat)
-    })
-    const msgSentThoughtSocket = (chat) => {
-
-        socket.emit("msgThoughSocket", (chat))
-    }
     const updateIsScreenShare = (data) => {
 
         dispatch({
             type: "SET_SCREENSHARE",
             screenShare: data
         })
+        socket.emit("screenShareToSocket", data, myPeer?._id)
     }
+
     const updateMicStatus = (data) => {
         dispatch({
             type: "SET_MICSTATUS",
             mic: data
         })
     }
+    const updateCamStatus = (data) => {
+        dispatch({
+            type: "SET_CAMSTATUS",
+            mic: data
+        })
+    }
+    const updateMyScreenShareStatus = (data) => {
+        dispatch({
+            type: "SET_MYSCREEN",
+            screen: data
+        })
+        // screenShareFunction()
+    }
+    const [socketOtherChat, setSocketOtherChat] = useState()
+
+    socket.on("msgSent", (chat) => {
+        setSocketOtherChat(chat)
+    })
+    const msgSentThoughtSocket = (chat) => {
+        socket.emit("msgThoughSocket", (chat))
+    }
+
+    socket.on("screenShareToClient", async (data, id) => {
+        dispatch({
+            type: "SET_SCREENSHARE",
+            screenShare: data
+        })
+        // const screenDiv = document.getElementsByClassName("screen-share-div")[0]
+        // console.log(screenDiv)
+        // if (screenDiv) {
+        //     screenDiv?.forEach(div => {
+        //         div.remove()
+        //     })
+        // }
+
+
+        const track = document.getElementById(id).firstChild.srcObject
+
+        const newStream = new MediaStream([track.getTracks()[3]])
+        setTimeout(() => {
+            try {
+                screenRef.current.srcObject = newStream
+            } catch (e) { }
+
+        }, 2000)
+
+        // const div = document.createElement("div")
+        // div.id = id + "-screen"
+        // const video = document.createElement("video")
+        // video.srcObject = newStream
+        // video.onloadedmetadata = function (e) {
+        //     video.play()
+        // }
+        // div.className = "screen-share-div"
+        // div.append(video)
+        // document.getElementById("top_div").append(div)
+
+        // remoteStreams.map(stream => {
+        //     if (stream.id === id) {
+        //         let tempStream = stream?.stream
+
+        //         const track = new MediaStream([tempStream.getTracks()[3]])
+        //         const div = document.createElement("div")
+        //         div.id = stream?.id + "-screen"
+        //         const video = document.createElement("video")
+        //         video.srcObject = track
+        //         video.onloadedmetadata = function (e) {
+        //             video.play()
+        //         }
+        //         div.className = "screen-share-div"
+        //         div.append(video)
+        //         document.getElementById("top_div")?.append(div)
+        //     }
+        // })
+
+    })
+    const btnScreenShare = () => {
+        if (!state.myScreenShare) {
+            screenShareFunction()
+        } else {
+            if (document.getElementById(myPeer?._id + "-screen")) {
+                const videoTrack = screenStream?.getTracks()?.find(track => track.kind === "video")
+                videoTrack.stop()
+                // document.getElementById(myPeer?._id + "-screen").remove()
+            }
+
+        }
+    }
+    // useEffect(() => {
+    //     if (!state.myScreenShare) {
+    //         screenShareFunction()
+    //     } else {
+    //         if (document.getElementById(myPeer?._id + "-screen")) {
+    //             const videoTrack = screenStream?.getTracks()?.find(track => track.kind === "video")
+    //             videoTrack.stop()
+    //             document.getElementById(myPeer?._id + "-screen").remove()
+    //         }
+
+    //     }
+    // }, [state.myScreenShare])
+
+
+    const [screenStream, setScreenStream] = useState()
+
+
+    const screenShareFunction = () => {
+
+        // if (screenShareOn == true) {
+
+        //     screenShareOn = false
+        //     document.getElementsByClassName("screen-share-div")[0].remove()
+        //     document.getElementById("all-users").style.width = "100%"
+        //     socket.emit("screenShareStopToServer", peerIDMain)
+        //     document.getElementById("screenShareBtn").className = "call-btnOff"
+        //     return videoTrack.stop()
+        // }
+
+
+
+        navigator.mediaDevices.getDisplayMedia({
+            video: {
+                width: { ideal: 4096 },
+                height: { ideal: 2160 },
+                frameRate: { ideal: 60, max: 120 }
+            },
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                sampleRate: 44100,
+            },
+        }).then((stream) => {
+            // screenShareOn = true
+            setScreenStream(stream)
+            let videoTrack = stream.getVideoTracks()[0];
+            let audioTrack = stream.getAudioTracks()[0]
+            // let allTrack = stream.getTracks()
+
+            // myStream.getTracks()[2].enabled = true
+            // console.log(myStream.getTracks()[3])
+            // console.log(myStream.getTracks()[1])
+
+
+            callers.forEach(call => {
+                call.peerConnection.getSenders()[3].replaceTrack(videoTrack)
+                call.peerConnection.getSenders()[1].replaceTrack(audioTrack)
+            })
+            answers.forEach(call => {
+                call.peerConnection.getSenders()[3].replaceTrack(videoTrack)
+                call.peerConnection.getSenders()[1].replaceTrack(audioTrack)
+            })
+            // call.peerConnection.getSenders()[1].replaceTrack(videoTrack)
+            // document.getElementById("all-users").style.width = "20%"
+            try {
+                screenRef.current.srcObject = stream
+            } catch (e) { }
+
+
+            // const div = document.createElement("div")
+            // div.id = myPeer?._id + "-screen"
+            // const video = document.createElement("video")
+            // video.srcObject = stream
+            // video.onloadedmetadata = function (e) {
+            //     video.play()
+            // }
+            // div.className = "screen-share-div"
+            // div.append(video)
+            // document.getElementById("top_div").append(div)
+
+
+
+
+            // document.getElementsByClassName("video-div")[0].insertBefore(div, document.getElementsByClassName("video-div")[0].children[0])
+            // videoThumbailsChange(screenShareOn = true)
+            // document.getElementById("screenShareBtn").className = "call-btnOn"
+            // socket.emit("screenShareOnToServer", peerIDMain)
+
+
+        }).catch((e) => {
+            updateMyScreenShareStatus(false)
+            updateIsScreenShare(false)
+
+        })
+    }
+
+
+
+
+
     const [tempRemoteStream, setTempRemoteStream] = useState()
     socket.on("user-disconnect", (userId) => {
-
         try {
             if (document.getElementById(userId)) {
                 document.getElementById(userId).remove()
@@ -221,7 +403,6 @@ export const DataLayer = ({ children }) => {
         ))
     })
     const newVideo = () => {
-
         try {
             getUserMedia({ video: true },
                 function (stream) {
@@ -244,13 +425,11 @@ export const DataLayer = ({ children }) => {
         } catch (e) {
             console.log(e)
         }
-
     }
-    const camOnOffToSocket = () => {
 
+    const camOnOffToSocket = () => {
         try {
             const videoTrack = myStream?.getTracks()?.find(track => track.kind === "video")
-
             if (videoTrack?.enabled) {
                 videoTrack.enabled = false;
                 videoTrack.stop()
@@ -262,28 +441,28 @@ export const DataLayer = ({ children }) => {
                 if (videoTrack) {
                     videoTrack.enabled = true;
                 }
-
-
             }
         } catch (e) {
             console.log(e)
         }
-
-
-
-
     }
+
+
+
     const value = {
         remotePeersRef,
         remoteStreams,
         myStream,
         myVideo,
+        screenRef,
         msgDisplay: state.msgDisplay,
         userName: state.userName,
         isScreenShare: state.isScreenShare,
         socketOtherChat,
         myPeerId: state.myPeer,
         micStatus: state.micStatus,
+        camStatus: state.camStatus,
+        myScreenShare: state.myScreenShare,
         updateMsgDisplayReducer,
         updateNameReducer,
         updateRoomIdReducer,
@@ -291,7 +470,11 @@ export const DataLayer = ({ children }) => {
         updateIsScreenShare,
         socketMicOnOff,
         updateMicStatus,
-        camOnOffToSocket
+        updateCamStatus,
+        camOnOffToSocket,
+        updateMyScreenShareStatus,
+        btnScreenShare
+
     }
 
 
@@ -305,6 +488,7 @@ export const DataLayer = ({ children }) => {
     )
 }
 export const useDataLayerValue = () => useContext(DataLayerContext)
+
 
 let black = ({ width = 640, height = 480 } = {}) => {
     let canvas = Object.assign(document.createElement("canvas"), { width, height });
