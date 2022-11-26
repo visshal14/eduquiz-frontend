@@ -12,7 +12,7 @@ function VideoConference() {
     LoginChecker(-1)
     const { id, status } = useParams()
 
-    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camStatus, updateCamStatus, camOnOffToSocket, updateMyScreenShareStatus, btnScreenShare } = useDataLayerValue()
+    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camStatus, updateCamStatus, camOnOffToSocket, updateMyScreenShareStatus, btnScreenShare, myScreenShare } = useDataLayerValue()
 
     const [copyToolTipDis, setCopyToolTipDis] = useState("none")
     // const [micOnOff, setMicOff] = useState("off")
@@ -51,9 +51,11 @@ function VideoConference() {
     // }
     useEffect(() => {
         socketMicOnOff(micStatus)
+        // eslint-disable-next-line
     }, [micStatus])
     useEffect(() => {
         camOnOffToSocket()
+        // eslint-disable-next-line
     }, [camStatus])
     useEffect(() => {
 
@@ -63,8 +65,9 @@ function VideoConference() {
         } else {
             updateIsScreenShare(true)
             updateMyScreenShareStatus(true)
-
+            // eslint-disable-next-line
         }
+        // eslint-disable-next-line
     }, [screenShareOnOff])
 
     const screenShareBtnMain = () => {
@@ -106,9 +109,9 @@ function VideoConference() {
                             onClick={() => (camStatus === "off") ? updateCamStatus("on") : updateCamStatus("off")} type="button">
                             {(camStatus === "on") ? <VideocamOutlined /> : <VideocamOffOutlined />}
                         </button>
-                        <button style={{ backgroundColor: (screenShareOnOff === "off") ? "#d95240" : "#27292b" }}
+                        <button style={{ backgroundColor: (myScreenShare === false && screenShareOnOff === "off") ? "#d95240" : "#27292b" }}
                             onClick={screenShareBtnMain} type="button">
-                            {(screenShareOnOff === "on") ? <ScreenShareOutlined /> : <StopScreenShareOutlined />}
+                            {(myScreenShare === false && screenShareOnOff === "on") ? <ScreenShareOutlined /> : <StopScreenShareOutlined />}
                         </button>
                         <button style={{ backgroundColor: (msgDis === "none") ? "#27292b" : "#3f8dfd" }}
                             onClick={() => {
