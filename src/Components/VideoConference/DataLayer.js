@@ -9,7 +9,7 @@ import { io } from "socket.io-client";
 //     forceNew: true,
 //     transports: ["polling"],
 // });
-const socket = io.connect("https://eduquiz001.herokuapp.com", {
+const socket = io.connect("https://eduquiz001.onrender.com", {
     // forceNew: true,
     // transports: ["polling"],
 });
@@ -30,12 +30,13 @@ export const DataLayer = ({ children }) => {
     const remotePeersRef = useRef([])
     const screenRef = useRef()
     var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
     useEffect(() => {
         const peer = new Peer(undefined, {
             path: "/peerjs",
             // host: "localhost",
             // port: "3001",
-            host: "eduquiz001.herokuapp.com",
+            host: "eduquiz001.onrender.com",
             port: "443",
             secure: true,
             config: peerServerList
@@ -46,6 +47,8 @@ export const DataLayer = ({ children }) => {
         //     console.log(e)
         // })
     }, [])
+
+
     const [answers, setAnswers] = useState([])
     useEffect(() => {
         myPeer?.on("open", (id) => {
@@ -208,6 +211,17 @@ export const DataLayer = ({ children }) => {
     }
 
     socket.on("screenShareToClient", async (data, id) => {
+
+        try {
+
+            const videoTrack = screenStream?.getTracks()?.find(track => track.kind === "video")
+            videoTrack?.stop()
+            updateMyScreenShareStatus(false)
+        } catch (e) {
+
+        }
+
+
         dispatch({
             type: "SET_SCREENSHARE",
             screenShare: data
