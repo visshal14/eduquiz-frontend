@@ -12,7 +12,7 @@ function VideoConference() {
     LoginChecker(-1)
     const { id, status } = useParams()
 
-    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camStatus, updateCamStatus, camOnOffToSocket, updateMyScreenShareStatus, btnScreenShare, myScreenShare } = useDataLayerValue()
+    const { updateMsgDisplayReducer, updateNameReducer, updateRoomIdReducer, updateIsScreenShare, socketMicOnOff, micStatus, updateMicStatus, camStatus, updateCamStatus, camOnOffToSocket, updateMyScreenShareStatus, btnScreenShare, myScreenShare, leave_button } = useDataLayerValue()
 
     const [copyToolTipDis, setCopyToolTipDis] = useState("none")
     // const [micOnOff, setMicOff] = useState("off")
@@ -78,6 +78,20 @@ function VideoConference() {
     //     camOnOff === "off" ? setCamOnOff("on") : setCamOnOff("off")
     // }
 
+    useEffect(() => {
+        for (let i = 0; i < document.getElementsByClassName("nav_content_col").length; i++) {
+            document.getElementsByClassName("nav_content_col")[i].style.color = "white"
+        }
+        return () => {
+            for (let i = 0; i < document.getElementsByClassName("nav_content_col").length; i++) {
+                document.getElementsByClassName("nav_content_col")[i].style.color = "black"
+            }
+        }
+    }, [])
+    const leaveBtn = () => {
+        leave_button()
+    }
+
     return (
         <div className='vc_main'>
             <div style={vc_left}>
@@ -124,9 +138,13 @@ function VideoConference() {
                             <ChatOutlined />
                         </button>
                     </div>
-                    <div className='leave_btn'>
+                    {/* <div className='leave_btn'> */}
+                    <button className='leave_btn'
+                        onClick={leaveBtn}
+                        type="button">
                         Leave Meeting
-                    </div>
+                    </button>
+                    {/* </div> */}
                 </div>
             </div>
             <div style={{ display: msgDis }} className='vc_Right'>

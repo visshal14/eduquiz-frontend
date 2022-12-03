@@ -61,10 +61,11 @@
     display: flex;
     align-items: center;
 
-
+    color: white;
     padding: 15px 30px;
     border-radius: 10px;
     background-color: #d95240;
+    border: transparent;
 }
 
 .navigation_btn>button {

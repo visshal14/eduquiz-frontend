@@ -9,15 +9,15 @@ function Navbar() {
 
         <div className='nav_main_div'>
             <div className='nav_logo'>
-                <a href="/">Eduquiz</a>
+                <a className="nav_content_col" href="/">Eduquiz</a>
             </div>
             <div className='nav_list_main'>
                 <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/courseSelection">Courses</a></li>
-                    <li><a href="/room-selection/id/p">Room</a></li>
-                    <li><a href="/">Contact Us</a></li>
-                    <li><a href="/login/0"><AccountCircleIcon /></a></li>
+                    <li><a className="nav_content_col" href="/">Home</a></li>
+                    <li><a className="nav_content_col" href="/courseSelection">Courses</a></li>
+                    <li><a className="nav_content_col" href="/room-selection/id/p">Room</a></li>
+                    <li><a className="nav_content_col" href="/">Contact Us</a></li>
+                    <li><a className="nav_content_col" href="/login/0"><AccountCircleIcon /></a></li>
                 </ul>
             </div>
         </div>

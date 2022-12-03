@@ -5,7 +5,8 @@ import { io } from "socket.io-client";
 
 
 
-// const socket = io.connect("http://localhost:3001", {
+
+// const socket = io.connect("http://localhost:4000", {
 //     forceNew: true,
 //     transports: ["polling"],
 // });
@@ -35,8 +36,8 @@ export const DataLayer = ({ children }) => {
         const peer = new Peer(undefined, {
             path: "/peerjs",
             // host: "localhost",
-            // port: "3001",
-            host: "eduquiz001.onrender.com",
+            // port: "4000",
+            host: "eduquiz001.onrender",
             port: "443",
             secure: true,
             config: peerServerList
@@ -53,7 +54,7 @@ export const DataLayer = ({ children }) => {
     useEffect(() => {
         myPeer?.on("open", (id) => {
             updateMyPeer(id)
-            console.log("My peer: ", id)
+            // console.log("My peer: ", id)
             socket.emit("join-roomF", state.roomId, id, state.userName)
         })
         if (myPeer) {
@@ -461,6 +462,10 @@ export const DataLayer = ({ children }) => {
         }
     }
 
+    const leave_button = () => {
+        socket.close();
+        window.location.href = "/room-selection/id/p"
+    }
 
 
     const value = {
@@ -487,7 +492,8 @@ export const DataLayer = ({ children }) => {
         updateCamStatus,
         camOnOffToSocket,
         updateMyScreenShareStatus,
-        btnScreenShare
+        btnScreenShare,
+        leave_button
 
     }
 

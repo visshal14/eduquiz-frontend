@@ -28,6 +28,7 @@ function Quiz() {
     const [hardQuesNo, setHardQuesNo] = useState({})
     const [questionArray, setQuestionArray] = useState([])
     const [result, setResult] = useState(0)
+    // eslint-disable-next-line
     const [resultStat, setResultStat] = useState([])
 
     const checkAnswer = async () => {
@@ -68,10 +69,10 @@ function Quiz() {
             level: result,
         }, { headers: { "Authorization": `Bearer ${window.localStorage.getItem("accessToken")}` } })
             .then((response) => {
-                console.log(response.data)
+                // console.log(response.data)
             })
-        console.log(result)
-        console.log(resultStat)
+        // console.log(result)
+        // console.log(resultStat)
         setQuiz_result_display("flex")
     }
 
