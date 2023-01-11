@@ -71,8 +71,6 @@ function Quiz() {
             .then((response) => {
                 // console.log(response.data)
             })
-        // console.log(result)
-        // console.log(resultStat)
         setQuiz_result_display("flex")
     }
 

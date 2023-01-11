@@ -1,7 +1,5 @@
 
 import React, { useState, useEffect } from 'react'
-// import { keyframes } from "styled-components";
-// import { complete } from "../Components/Quiz/Quiz"
 function Button({ name, font, link, padding, id, value, bgcolor }) {
     name = name || "Hello"
     font = font || "25"
@@ -9,11 +7,6 @@ function Button({ name, font, link, padding, id, value, bgcolor }) {
     value = value || null
 
     bgcolor = bgcolor || "white"
-    // width = width || "auto"
-
-    // link = link || "/"
-
-
     const [width, setWidth] = useState((window.innerWidth / 4) - 40);
 
 

@@ -27,6 +27,8 @@ function Register() {
                 if (response.data === "succesfull") {
                     alert("registration done")
                     window.location.href = "/login/0"
+                } else {
+                    alert(response.data)
                 }
             })
             .catch(function (error) {

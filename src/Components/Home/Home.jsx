@@ -15,17 +15,6 @@ function Home() {
         alignItems: "center",
         padding: "0 50px",
     }
-
-
-
-    // const home_start_btn = {
-    //     fontSize: "25px",
-    //     padding: " 20px 60px",
-    //     borderRadius: "505px",
-    //     border: "1px solid black",
-    //     backgroundColor: "white",
-    //     marginTop: "20px",
-    // }
     return (
         <div style={home_main}>
             <div className='home_content'>

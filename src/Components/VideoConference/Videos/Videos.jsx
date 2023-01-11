@@ -108,11 +108,6 @@ function Videos({ micStatus, camStatus }) {
         display: bottomDivStyle.display,
         overflow: "scroll"
     }
-
-    // const { myVideo, remoteStreams, remotePeersRef } = useDataLayerValue()
-    // useEffect(() => {
-    //     console.log(remotePeersRef)
-    // }, [remotePeersRef])
     useEffect(() => {
 
         if (isScreenShare) {
@@ -177,13 +172,6 @@ function Videos({ micStatus, camStatus }) {
                         myVideoDiv[i].style.height = "100%"
                     }
                 }
-                // else{
-                //     for (let i = 0; i < myVideoDiv.length; i++) {
-                //         // myVideoDiv[i].style.width = "100%"
-                //         myVideoDiv[i].style.height = "100%"
-                //     }
-                // }
-
             }
 
             // 25%
