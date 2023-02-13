@@ -14,6 +14,7 @@ import PasswordReset from './Components/ForgetPassword/PasswordReset';
 import RoomSelection from './Components/RoomSelection/RoomSelection';
 import VideoConference from './Components/VideoConference/VideoConference';
 import { DataLayer } from "./Components/VideoConference/DataLayer"
+import Whiteboard from './Components/Whiteboard/Whiteboard';
 //navbar
 //frontpage
 //courseselect
@@ -51,6 +52,7 @@ function App() {
             </DataLayer>
 
           } />
+          <Route path="/whiteboard" element={<Whiteboard />} />
 
 
         </Routes>
