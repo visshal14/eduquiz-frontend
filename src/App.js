@@ -1,6 +1,6 @@
 
 import './App.css';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from './Components/Home/Home';
 import Navbar from './Components/Navbar/Navbar';
 import CourseSelection from './Components/CourseSelection/CourseSelection';
@@ -15,6 +15,8 @@ import RoomSelection from './Components/RoomSelection/RoomSelection';
 import VideoConference from './Components/VideoConference/VideoConference';
 import { DataLayer } from "./Components/VideoConference/DataLayer"
 import Whiteboard from './Components/Whiteboard/Whiteboard';
+import { useParams } from 'react-router-dom';
+import { v4 as uuid } from 'uuid';
 //navbar
 //frontpage
 //courseselect
@@ -52,7 +54,8 @@ function App() {
             </DataLayer>
 
           } />
-          <Route path="/whiteboard" element={<Whiteboard />} />
+          <Route exact path="/whiteboard" element={<WhiteBoardUniqueId />} />
+          <Route exact path="/whiteboard/:id" element={<Whiteboard />} />
 
 
         </Routes>
@@ -60,5 +63,20 @@ function App() {
     </div>
   );
 }
+
+const WhiteBoardUniqueId = () => {
+  const { id } = useParams()
+  console.log(id)
+  if (!id) {
+    console.log("if")
+    const unique_id = uuid();
+    const small_id = unique_id.slice(0, 8)
+    console.log(small_id)
+    window.location.href = `/whiteboard/${small_id}`
+    // Navigate(`/whiteboard/${small_id}`)
+  }
+  // return (<></>)
+}
+
 
 export default App;

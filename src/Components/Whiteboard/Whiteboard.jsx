@@ -3,8 +3,9 @@ import "./WhiteBoard.css"
 // import $ from 'jquery';
 import { Create, CropSquare, PanoramaFishEye, Clear, Undo, Redo, ModeEditOutline, AutoFixNormal } from '@mui/icons-material/';
 import { useRef } from 'react';
-
+import { newElementsToOther, updateElementsToOther, whiteBoardBrain, socket } from './whiteBoardBrain';
 import rough from "roughjs/bundled/rough.esm";
+import { v4 as uuid } from 'uuid';
 
 
 const generator = rough.generator();
@@ -112,13 +113,17 @@ const Whiteboard = () => {
     // }, [])
 
     const [elements, setElements] = useState([])
-    const [strokeType, setStrokeType] = useState("ellipse")
+    const [myElements, setMyElements] = useState([])
+    const [strokeType, setStrokeType] = useState("pencil")
     const [eleHistory, setEleHistory] = useState([])
     const [strokeWidth, setStrokeWidth] = useState("5")
     const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - 200)
 
 
+
+
     useEffect(() => {
+        whiteBoardBrain()
         const canvas = canvasRef.current
         // var myCanvas = document.getElementById("myCanvas");
         var ctx = canvas.getContext("2d");
@@ -175,9 +180,22 @@ const Whiteboard = () => {
     //         ctx.stroke();
     //     }
     // }
-
+    // useEffect(() => {
+    //     elements?.map((ele, i) => {
+    //         console.log(elements[i])
+    //         console.log(elements[i + 1])
+    //         if (ele?.eleID !== elements[i + 1]?.eleID) {
+    //             console.log("id  " + ele.eleID)
+    //             console.log("next id  " + elements[i + 1]?.eleID)
+    //             return ele
+    //         }
+    //     })
+    //     // elements?.filter((v, i, a) => a.findIndex(v2 => (v2?.eleID === v?.eleID)) === i)
+    // }, [elements])
 
     useLayoutEffect(() => {
+
+        // updateElementsToOther(elements, setElements)
 
         const roughCanvas = rough.canvas(canvasRef.current);
         const canvas = canvasRef.current
@@ -232,7 +250,8 @@ const Whiteboard = () => {
                 ele.path.map((x) => (
                     tempPath = [...tempPath, [x[0] * widthRatio, x[1] * widthRatio]]
                 ))
-                roughCanvas.linearPath(ele.path, {
+
+                roughCanvas.linearPath(tempPath, {
                     stroke: ele.stroke,
                     roughness: 0,
                     strokeWidth: ele.strokeWidth * widthRatio || 5,
@@ -244,15 +263,42 @@ const Whiteboard = () => {
 
 
     const [isDrawing, setIsDrawing] = useState(false)
+    const [currentEleId, setCurrentEleId] = useState()
+
+    // useEffect(() => {
+    //     const tempElement = elements
+    //     // tempElement.map((ele, i) =>
+    //     //     ele.eleID === currentEleId && i === tempElement.length - 1 ? setMyElements((prev) => [...prev, ele]) : ele
+    //     // )
+    //     // if (tempElement[tempElement.length - 1]?.eleID === currentEleId) {
+    //     //     setMyElements((prev) => [...prev, tempElement[tempElement.length - 1]])
+    //     // }
+
+    //     if (myElements[myElements.length - 1]?.eleID === currentEleId) {
+    //         setMyElements((prev) =>
+    //             prev.map((ele, i) =>
+    //                 i === myElements[myElements.length - 1] ? elements[elements.length - 1] : ele
+    //             ))
+    //     } else {
+    //         setMyElements((prev) => [...prev, elements[elements.length - 1]])
+    //     }
+
+    //     // eslint-disable-next-line
+    // }, [currentEleId, elements])
 
     const mouseDown = (e) => {
         const { offsetX, offsetY } = e.nativeEvent
         setIsDrawing(true)
+        const currentId = uuid().slice(0, 8)
+        setCurrentEleId(currentId)
+        let tempEleForSocket = {}
+
         if (strokeType === "line") {
             setElements((prevElements) => [
                 ...prevElements,
-                { offsetX, offsetY, stroke: "black", element: "line", strokeWidth: strokeWidth },
+                { offsetX, offsetY, stroke: "black", element: "line", strokeWidth: strokeWidth, eleID: currentId },
             ]);
+            tempEleForSocket = { offsetX, offsetY, stroke: "black", element: "line", strokeWidth: strokeWidth, eleID: currentId }
         } else if (strokeType === "pencil") {
             setElements((prevElements) => [
                 ...prevElements,
@@ -263,25 +309,38 @@ const Whiteboard = () => {
                     stroke: "blue",
                     element: "pencil",
                     strokeWidth: strokeWidth,
-                    canvasWidth: canvasWidth
+                    canvasWidth: canvasWidth, eleID: currentId
                 },
             ]);
+            tempEleForSocket = {
+                offsetX,
+                offsetY,
+                path: [[offsetX, offsetY]],
+                stroke: "blue",
+                element: "pencil",
+                strokeWidth: strokeWidth,
+                canvasWidth: canvasWidth, eleID: currentId
+            }
         }
         else if (strokeType === "rect") {
             setElements((prevElements) => [
                 ...prevElements,
-                { offsetX, offsetY, stroke: "black", element: "rect", strokeWidth: strokeWidth, canvasWidth: canvasWidth },
+                { offsetX, offsetY, stroke: "black", element: "rect", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId }
             ]);
+            tempEleForSocket = { offsetX, offsetY, stroke: "black", element: "rect", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId }
         } else if (strokeType === "circle") {
             setElements((prevElements) => [
                 ...prevElements,
-                { offsetX, offsetY, radius: 0, stroke: "black", element: "circle", strokeWidth: strokeWidth, canvasWidth: canvasWidth }
+                { offsetX, offsetY, radius: 0, stroke: "black", element: "circle", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId }
             ])
+            tempEleForSocket = { offsetX, offsetY, radius: 0, stroke: "black", element: "circle", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId }
         } else if (strokeType === "ellipse") {
             setElements((prevElements) => [
                 ...prevElements,
-                { offsetX, offsetY, width: 0, height: 0, stroke: "black", element: "ellipse", strokeWidth: strokeWidth, canvasWidth: canvasWidth }
+                { offsetX, offsetY, width: 0, height: 0, stroke: "black", element: "ellipse", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId }
             ])
+            tempEleForSocket = { offsetX, offsetY, width: 0, height: 0, stroke: "black", element: "ellipse", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId }
+
         } else if (strokeType === "eraser") {
             setElements((prevElements) => [
                 ...prevElements,
@@ -290,27 +349,36 @@ const Whiteboard = () => {
                     offsetY,
                     path: [[offsetX, offsetY]],
                     stroke: "#fff",
-                    element: "eraser", strokeWidth: strokeWidth, canvasWidth: canvasWidth
+                    element: "eraser", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId
                 },
             ]);
+            tempEleForSocket = {
+                offsetX,
+                offsetY,
+                path: [[offsetX, offsetY]],
+                stroke: "#fff",
+                element: "eraser", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId
+            }
         }
 
+        console.log("new")
+        console.log(tempEleForSocket)
+        newElementsToOther(tempEleForSocket, setElements)
     }
 
     const [isShiftPressed, setIsShift] = useState(false)
     const mouseMove = (e) => {
         eraserCursor(e)
-
-
-
         e = e.nativeEvent
         if (!isDrawing) {
             return;
         }
+        let tempEleForUpdateSocket = {}
         if (strokeType === "line") {
             setElements((prevElements) =>
                 prevElements.map((ele, index) =>
-                    index === elements.length - 1
+                    // index === elements.length - 1
+                    ele.eleID === currentEleId
                         ? {
                             offsetX: ele.offsetX,
                             offsetY: ele.offsetY,
@@ -319,15 +387,17 @@ const Whiteboard = () => {
                             stroke: ele.stroke,
                             element: "line",
                             strokeWidth: ele.strokeWidth,
-                            canvasWidth: canvasWidth
+                            canvasWidth: canvasWidth,
+                            eleID: ele.eleID
                         }
                         : ele
                 )
             );
+            tempEleForUpdateSocket = { element: "line", width: e.offsetX, height: e.offsetY, canvasWidth: canvasWidth, eleID: currentEleId }
         } else if (strokeType === "rect") {
             setElements((prevElements) =>
                 prevElements.map((ele, index) =>
-                    index === elements.length - 1
+                    ele.eleID === currentEleId
                         ? {
                             offsetX: ele.offsetX,
                             offsetY: ele.offsetY,
@@ -335,43 +405,50 @@ const Whiteboard = () => {
                             height: e.offsetY - ele.offsetY,
                             stroke: ele.stroke,
                             element: "rect",
-                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth
+                            strokeWidth: ele.strokeWidth,
+                            canvasWidth: canvasWidth,
+                            eleID: ele.eleID
                         }
                         : ele
                 )
             )
+            tempEleForUpdateSocket = { element: "rect", width: e.offsetX, height: e.offsetY, canvasWidth: canvasWidth, eleID: currentEleId }
+
+
         } else if (strokeType === "pencil") {
             setElements((prevElements) =>
                 prevElements.map((ele, index) =>
-                    index === elements.length - 1
+                    ele.eleID === currentEleId
                         ? {
                             offsetX: ele.offsetX,
                             offsetY: ele.offsetY,
                             path: [...ele.path, [e.offsetX, e.offsetY]],
                             stroke: ele.stroke,
                             element: ele.element,
-                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth
+                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth, eleID: ele.eleID
                         }
                         : ele
                 )
             );
+            tempEleForUpdateSocket = { element: "pencil", pathX: e.offsetX, pathY: e.offsetY, canvasWidth: canvasWidth, eleID: currentEleId }
         } else if (strokeType === "circle") {
             const tempEl = elements[elements.length - 1]
             const d = Math.sqrt((tempEl.offsetX - e.offsetX) * (tempEl.offsetX - e.offsetX) + (tempEl.offsetY - e.offsetY) * (tempEl.offsetY - e.offsetY))
             setElements((prevElements) =>
                 prevElements.map((ele, index) =>
-                    index === elements.length - 1
+                    ele.eleID === currentEleId
                         ? {
                             offsetX: ele.offsetX,
                             offsetY: ele.offsetY,
                             radius: d * 2,
                             stroke: ele.stroke,
                             element: ele.element,
-                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth
+                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth, eleID: ele.eleID
                         }
                         : ele
                 )
             );
+            tempEleForUpdateSocket = { element: "circle", radius: d * 2, canvasWidth: canvasWidth, eleID: currentEleId }
             // roughCanvas.circle(480, 50, 80);
         } else if (strokeType === "ellipse") {
             const tempEl = elements[elements.length - 1]
@@ -388,7 +465,7 @@ const Whiteboard = () => {
             }
             setElements((prevElements) =>
                 prevElements.map((ele, index) =>
-                    index === elements.length - 1
+                    ele.eleID === currentEleId
                         ? {
                             offsetX: ele.offsetX,
                             offsetY: ele.offsetY,
@@ -396,32 +473,161 @@ const Whiteboard = () => {
                             height: tempHeight,
                             stroke: ele.stroke,
                             element: ele.element,
-                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth
+                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth, eleID: ele.eleID
                         }
                         : ele
                 )
             );
+            tempEleForUpdateSocket = { element: "ellipse", width: tempWidth, height: tempHeight, canvasWidth: canvasWidth, eleID: currentEleId }
         } else if (strokeType === "eraser") {
             setElements((prevElements) =>
                 prevElements.map((ele, index) =>
-                    index === elements.length - 1
+                    ele.eleID === currentEleId
                         ? {
                             offsetX: ele.offsetX,
                             offsetY: ele.offsetY,
                             path: [...ele.path, [e.offsetX, e.offsetY]],
                             stroke: ele.stroke,
                             element: ele.element,
-                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth
+                            strokeWidth: ele.strokeWidth, canvasWidth: canvasWidth, eleID: ele.eleID
                         }
                         : ele
                 )
             );
+            tempEleForUpdateSocket = { element: "eraser", pathX: e.offsetX, pathY: e.offsetY, canvasWidth: canvasWidth, eleID: currentEleId }
+
         }
+
+
+        updateElementsToOther(tempEleForUpdateSocket, currentEleId, setElements, tempEleForUpdateSocket.element)
+
     }
 
 
 
 
+    useEffect(() => {
+        socket.on("updateElementToSocketUsers", (updatedElement, currentId, elementType) => {
+            console.log("updateElementToSocketUsers 29    " + elementType + "   " + currentId)
+            if (elementType === "line") {
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ?
+                            {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                width: updatedElement.width,
+                                height: updatedElement.height,
+                                stroke: ele.stroke,
+                                element: "line",
+                                strokeWidth: ele.strokeWidth,
+                                canvasWidth: updatedElement.canvasWidth,
+                                eleID: updatedElement.eleID,
+                            }
+                            : ele
+                    )
+                );
+            } else if (elementType === "rect") {
+                console.log(updatedElement)
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ? {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                width: updatedElement.width - ele.offsetX,
+                                height: updatedElement.height - ele.offsetY,
+                                stroke: ele.stroke,
+                                element: "rect",
+                                strokeWidth: ele.strokeWidth,
+                                canvasWidth: updatedElement.canvasWidth,
+                                eleID: updatedElement.eleID
+                            }
+                            : ele
+                    )
+                )
+            } else if (elementType === "pencil") {
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ? {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                path: [...ele.path, [updatedElement.pathX, updatedElement.pathY]],
+                                stroke: ele.stroke,
+                                element: ele.element,
+                                strokeWidth: ele.strokeWidth, canvasWidth: updatedElement.canvasWidth, eleID: updatedElement.eleID
+                            }
+                            : ele
+                    )
+                );
+            } else if (elementType === "circle") {
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ? {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                radius: updatedElement.radius,
+                                stroke: ele.stroke,
+                                element: ele.element,
+                                strokeWidth: ele.strokeWidth,
+                                canvasWidth: updatedElement.canvasWidth,
+                                eleID: updatedElement.eleID
+                            }
+                            : ele
+                    )
+                );
+            } else if (elementType === "ellipse") {
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ? {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                width: updatedElement.width,
+                                height: updatedElement.height,
+                                stroke: ele.stroke,
+                                element: ele.element,
+                                strokeWidth: ele.strokeWidth, canvasWidth: updatedElement.canvasWidth, eleID: updatedElement.eleID
+                            }
+                            : ele
+                    )
+                );
+            } else if (elementType === "eraser") {
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ? {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                path: [...ele.path, [updatedElement.pathX, updatedElement.pathY]],
+                                stroke: ele.stroke,
+                                element: ele.element,
+                                strokeWidth: ele.strokeWidth, canvasWidth: updatedElement.canvasWidth, eleID: updatedElement.eleID
+                            }
+                            : ele
+                    )
+                );
+            }
+
+        })
+        socket.on("newElementsToSocketUsers", (elements) => {
+            console.log("new element  ")
+            console.log(elements)
+            setElements((prev) => [...prev, elements])
+        })
+        socket.on("undoToSocketUsers", (elementId) => {
+            setElements((prev) =>
+                prev.filter((ele, i) => ele.eleID !== elementId)
+            )
+        })
+        socket.on("redoToSocketUsers", (element) => {
+            setElements((prev) => [...prev, element]);
+        })
+        // eslint-disable-next-line
+    }, [])
 
     const eraserCursor = (e) => {
         document.documentElement.style.setProperty('--x', (e?.clientX + window.scrollX) + 'px');
@@ -438,6 +644,11 @@ const Whiteboard = () => {
     const mouseUp = (e) => {
         setIsDrawing(false)
         eraserCursor()
+        myElementsUpdater()
+
+    }
+    const myElementsUpdater = () => {
+        setMyElements((prev) => [...prev, elements[elements.length - 1]])
     }
     const clearWhiteBoard = () => {
         const canvas = canvasRef.current
@@ -448,15 +659,21 @@ const Whiteboard = () => {
     }
     const undoWhiteBoard = () => {
         if (elements.length > 0) {
-            setEleHistory((prev) => [...prev, elements[elements.length - 1]]);
+            socket.emit("undoToSocketServer", myElements[myElements.length - 1].eleID)
+            setEleHistory((prev) => [...prev, myElements[myElements.length - 1]]);
             setElements((prev) =>
-                prev.filter((ele, i) => i !== elements.length - 1)
+                prev.filter((ele, i) => ele.eleID !== myElements[myElements.length - 1].eleID)
+            )
+            setMyElements((prev) =>
+                prev.filter((ele, i) => i !== myElements.length - 1)
             )
         }
     }
     const redoWhiteBoard = () => {
         if (eleHistory.length > 0) {
+            socket.emit("redoToSocketServer", eleHistory[eleHistory.length - 1])
             setElements((prev) => [...prev, eleHistory[eleHistory.length - 1]]);
+            setMyElements((prev) => [...prev, eleHistory[eleHistory.length - 1]]);
             setEleHistory((prev) =>
                 prev.filter((ele, i) => i !== eleHistory.length - 1)
             );
@@ -480,6 +697,7 @@ const Whiteboard = () => {
     return (
         <div className='whiteboard-home'>
             <div style={{ display: "none" }} id="circularcursor"></div>
+
             <canvas ref={canvasRef} id="myCanvas"
                 onMouseDown={mouseDown}
                 onMouseMove={mouseMove}
