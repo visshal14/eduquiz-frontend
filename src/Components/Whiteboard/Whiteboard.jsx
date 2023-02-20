@@ -1,11 +1,12 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react'
 import "./WhiteBoard.css"
 // import $ from 'jquery';
-import { Create, CropSquare, PanoramaFishEye, Clear, Undo, Redo, ModeEditOutline, AutoFixNormal } from '@mui/icons-material/';
+import { Create, CropSquare, PanoramaFishEye, Clear, Undo, Redo, ModeEditOutline, AutoFixNormal, StarBorderPurple500 } from '@mui/icons-material/';
 import { useRef } from 'react';
 import { newElementsToOther, updateElementsToOther, whiteBoardBrain, socket } from './whiteBoardBrain';
 import rough from "roughjs/bundled/rough.esm";
 import { v4 as uuid } from 'uuid';
+
 
 
 const generator = rough.generator();
@@ -114,7 +115,7 @@ const Whiteboard = () => {
 
     const [elements, setElements] = useState([])
     const [myElements, setMyElements] = useState([])
-    const [strokeType, setStrokeType] = useState("pencil")
+    const [strokeType, setStrokeType] = useState("fourSidesStar")
     const [eleHistory, setEleHistory] = useState([])
     const [strokeWidth, setStrokeWidth] = useState("5")
     const [canvasWidth, setCanvasWidth] = useState(window.innerWidth - 200)
@@ -141,7 +142,14 @@ const Whiteboard = () => {
         ctx.fillStyle = "#fff";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         // makeGrid()
+
+
+
     }, [])
+
+
+
+
 
     window.addEventListener("resize", async (e) => {
         let tempcanvasWidth = window.innerWidth - 200
@@ -180,18 +188,6 @@ const Whiteboard = () => {
     //         ctx.stroke();
     //     }
     // }
-    // useEffect(() => {
-    //     elements?.map((ele, i) => {
-    //         console.log(elements[i])
-    //         console.log(elements[i + 1])
-    //         if (ele?.eleID !== elements[i + 1]?.eleID) {
-    //             console.log("id  " + ele.eleID)
-    //             console.log("next id  " + elements[i + 1]?.eleID)
-    //             return ele
-    //         }
-    //     })
-    //     // elements?.filter((v, i, a) => a.findIndex(v2 => (v2?.eleID === v?.eleID)) === i)
-    // }, [elements])
 
     useLayoutEffect(() => {
 
@@ -257,6 +253,8 @@ const Whiteboard = () => {
                     strokeWidth: ele.strokeWidth * widthRatio || 5,
                 });
 
+            } else if (ele.element === "fourSidesStar") {
+                fourSidesStarFunction(ele.height * widthRatio, ele.offsetX * widthRatio, ele.offsetY * widthRatio, ele.strokeWidth * widthRatio)
             }
         })
     }, [elements, canvasWidth])
@@ -265,26 +263,7 @@ const Whiteboard = () => {
     const [isDrawing, setIsDrawing] = useState(false)
     const [currentEleId, setCurrentEleId] = useState()
 
-    // useEffect(() => {
-    //     const tempElement = elements
-    //     // tempElement.map((ele, i) =>
-    //     //     ele.eleID === currentEleId && i === tempElement.length - 1 ? setMyElements((prev) => [...prev, ele]) : ele
-    //     // )
-    //     // if (tempElement[tempElement.length - 1]?.eleID === currentEleId) {
-    //     //     setMyElements((prev) => [...prev, tempElement[tempElement.length - 1]])
-    //     // }
 
-    //     if (myElements[myElements.length - 1]?.eleID === currentEleId) {
-    //         setMyElements((prev) =>
-    //             prev.map((ele, i) =>
-    //                 i === myElements[myElements.length - 1] ? elements[elements.length - 1] : ele
-    //             ))
-    //     } else {
-    //         setMyElements((prev) => [...prev, elements[elements.length - 1]])
-    //     }
-
-    //     // eslint-disable-next-line
-    // }, [currentEleId, elements])
 
     const mouseDown = (e) => {
         const { offsetX, offsetY } = e.nativeEvent
@@ -359,10 +338,32 @@ const Whiteboard = () => {
                 stroke: "#fff",
                 element: "eraser", strokeWidth: strokeWidth, canvasWidth: canvasWidth, eleID: currentId
             }
+        } else if (strokeType === "fourSidesStar") {
+            setElements((prevElements) => [
+                ...prevElements,
+                {
+                    offsetX,
+                    offsetY,
+                    height: 0,
+                    stroke: "black",
+                    element: "fourSidesStar",
+                    strokeWidth: strokeWidth,
+                    canvasWidth: canvasWidth,
+                    eleID: currentId
+                },
+            ]);
+            tempEleForSocket = {
+                offsetX,
+                offsetY,
+                height: 0,
+                stroke: "black",
+                element: "fourSidesStar",
+                strokeWidth: strokeWidth,
+                canvasWidth: canvasWidth,
+                eleID: currentId
+            }
         }
 
-        console.log("new")
-        console.log(tempEleForSocket)
         newElementsToOther(tempEleForSocket, setElements)
     }
 
@@ -495,7 +496,24 @@ const Whiteboard = () => {
                 )
             );
             tempEleForUpdateSocket = { element: "eraser", pathX: e.offsetX, pathY: e.offsetY, canvasWidth: canvasWidth, eleID: currentEleId }
-
+        } else if (strokeType === "fourSidesStar") {
+            setElements((prevElements) =>
+                prevElements.map((ele, index) =>
+                    ele.eleID === currentEleId
+                        ? {
+                            offsetX: ele.offsetX,
+                            offsetY: ele.offsetY,
+                            height: e.offsetX - ele.offsetX,
+                            stroke: "black",
+                            element: "fourSidesStar",
+                            strokeWidth: ele.strokeWidth,
+                            canvasWidth: canvasWidth,
+                            eleID: ele.eleID
+                        }
+                        : ele
+                )
+            );
+            tempEleForUpdateSocket = { element: "fourSidesStar", height: e.offsetX, canvasWidth: canvasWidth, eleID: currentEleId }
         }
 
 
@@ -508,7 +526,7 @@ const Whiteboard = () => {
 
     useEffect(() => {
         socket.on("updateElementToSocketUsers", (updatedElement, currentId, elementType) => {
-            console.log("updateElementToSocketUsers 29    " + elementType + "   " + currentId)
+            // console.log("updateElementToSocketUsers 29    " + elementType + "   " + currentId)
             if (elementType === "line") {
                 setElements((prevElements) =>
                     prevElements.map((ele, index) =>
@@ -529,7 +547,7 @@ const Whiteboard = () => {
                     )
                 );
             } else if (elementType === "rect") {
-                console.log(updatedElement)
+                // console.log(updatedElement)
                 setElements((prevElements) =>
                     prevElements.map((ele, index) =>
                         ele.eleID === currentId
@@ -610,12 +628,29 @@ const Whiteboard = () => {
                             : ele
                     )
                 );
+            } else if (elementType === "fourSidesStar") {
+                setElements((prevElements) =>
+                    prevElements.map((ele, index) =>
+                        ele.eleID === currentId
+                            ? {
+                                offsetX: ele.offsetX,
+                                offsetY: ele.offsetY,
+                                height: updatedElement.height - ele.offsetX,
+                                stroke: "black",
+                                element: "fourSidesStar",
+                                strokeWidth: ele.strokeWidth,
+                                canvasWidth: canvasWidth,
+                                eleID: ele.eleID
+                            }
+                            : ele
+                    )
+                );
             }
 
         })
         socket.on("newElementsToSocketUsers", (elements) => {
-            console.log("new element  ")
-            console.log(elements)
+            // console.log("new element  ")
+            // console.log(elements)
             setElements((prev) => [...prev, elements])
         })
         socket.on("undoToSocketUsers", (elementId) => {
@@ -629,6 +664,159 @@ const Whiteboard = () => {
         // eslint-disable-next-line
     }, [])
 
+    useEffect(() => {
+        fourStar2Function(500, 100, 500, 500)
+    }, [])
+
+    const fourStar2Function = (x1, y1, x2, y2) => {
+        //1
+        let height = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))
+        let base = height / 2 * (1 + Math.tan(Math.PI / 6))
+        let perpen = base * Math.tan(Math.PI / 6)
+        console.log(height + "  " + base + "   " + (2 * perpen + 2 * base))
+        let line1_X1 = x1
+        let line1_Y1 = y1
+        let line1_X2 = x2
+        let line1_Y2 = y2
+    }
+
+
+    const fourSidesStarFunction = (heightSide, a, b, strokeWidth) => {
+        //500 100 - 500*hypto 100 
+        let line1_X1 = a //y1 to y2 = base
+        let line1_Y1 = b
+        // to change height
+        let b_1 = line1_Y1 + heightSide //base
+        let p_1 = (b_1 - line1_Y1) * Math.tan(Math.PI / 6)
+        let line1_X2 = line1_X1 + ~~p_1
+        let line1_Y2 = b_1
+        // console.log(`${line1_X1} ${line1_Y1} - ${line1_X2} ${line1_Y2}`)
+        //1
+        const roughCanvas = rough.canvas(canvasRef.current);
+        roughCanvas.draw(
+            generator.line(line1_X1, line1_Y1, line1_X2, line1_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+
+
+
+
+        //2
+        let line2_X1 = line1_X2
+        let line2_Y1 = line1_Y2
+        let p_2 = (line1_X2 - line1_X1)
+
+        let b_2 = p_2 / (Math.tan(Math.PI / 6))
+
+        let line2_X2 = line2_X1 + ~~b_2
+        let line2_Y2 = line1_Y2 + ~~p_2
+
+        roughCanvas.draw(
+            generator.line(line2_X1, line2_Y1, line2_X2, line2_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+        //3
+        let line3_X1 = line2_X2
+        let line3_Y1 = line2_Y2
+        let line3_X2 = line2_X1
+        let line3_Y2 = line2_Y1 + ~~p_2 * 2
+        roughCanvas.draw(
+            generator.line(line3_X1, line3_Y1, line3_X2, line3_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+
+
+        //4
+        let line4_X1 = line3_X2
+        let line4_Y1 = line3_Y2
+        let p_4 = (line1_X2 - line1_X1)
+        // console.log(p_2)
+        let b_4 = p_4 / (Math.tan(Math.PI / 6))
+        // console.log(b_4)
+        let line4_X2 = line4_X1 - (line1_X2 - line1_X1)
+
+        let line4_Y2 = line4_Y1 + ~~b_4
+        // console.log(`${line4_X1} ${line4_Y1} - ${line4_X2} ${line4_Y2}`)
+        roughCanvas.draw(
+            generator.line(line4_X1, line4_Y1, line4_X2, line4_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+
+
+
+
+
+        //5
+        let line5_X1 = line4_X2
+        let line5_Y1 = line4_Y2
+        let line5_X2 = line4_X2 - (line1_X2 - line1_X1)
+        let line5_Y2 = line4_Y1
+
+        roughCanvas.draw(
+            generator.line(line5_X1, line5_Y1, line5_X2, line5_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+
+
+        //6
+        let line6_X1 = line5_X2
+        let line6_Y1 = line5_Y2
+        let p_6 = (line1_X2 - line1_X1)
+
+        let b_6 = p_2 / (Math.tan(Math.PI / 6))
+
+        let line6_X2 = line6_X1 - ~~b_6
+        let line6_Y2 = line6_Y1 - ~~p_6
+
+        roughCanvas.draw(
+            generator.line(line6_X1, line6_Y1, line6_X2, line6_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+        //7
+        let line7_X1 = line6_X2
+        let line7_Y1 = line6_Y2
+        let line7_X2 = line6_X1
+        let line7_Y2 = line6_Y1 - ~~p_2 * 2
+        roughCanvas.draw(
+            generator.line(line7_X1, line7_Y1, line7_X2, line7_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+        //8
+        let line8_X1 = line1_X1
+        let line8_Y1 = line1_Y1
+        let line8_X2 = line1_X1 - (line1_X2 - line1_X1)
+        let line8_Y2 = line1_Y2
+        roughCanvas.draw(
+            generator.line(line8_X1, line8_Y1, line8_X2, line8_Y2, {
+                stroke: "black",
+                roughness: 0,
+                strokeWidth: strokeWidth || 5,
+            })
+        );
+
+
+    }
     const eraserCursor = (e) => {
         document.documentElement.style.setProperty('--x', (e?.clientX + window.scrollX) + 'px');
         document.documentElement.style.setProperty('--y', (e?.clientY + window.scrollY) + 'px');
@@ -704,7 +892,7 @@ const Whiteboard = () => {
                 onMouseUp={mouseUp}
             >
             </canvas>
-
+            {/* fourSidesStar */}
 
             <div className='toolbox'>
                 <ul>
@@ -714,6 +902,7 @@ const Whiteboard = () => {
                     <li data-text="Ellipse"><PanoramaFishEye onClick={() => { setStrokeType("ellipse") }} /></li>
                     <li data-text="Pencil"><ModeEditOutline onClick={() => { setStrokeType("pencil") }} /></li>
                     <li data-text="Eraser"><AutoFixNormal onClick={() => { setStrokeType("eraser") }} /></li>
+                    <li data-text="Four Sides Star"><StarBorderPurple500 onClick={() => { setStrokeType("fourSidesStar") }} /></li>
                     <li data-text="Clear WhiteBoard"><Clear onClick={clearWhiteBoard} /></li>
                     <li data-text="Undo"><Undo onClick={undoWhiteBoard} /></li>
                     <li data-text="Redo"><Redo onClick={redoWhiteBoard} /></li>
