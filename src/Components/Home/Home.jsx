@@ -1,5 +1,5 @@
 
-import React from 'react'
+import React,{useEffect} from 'react'
 import "./Home.css"
 import { frontBack } from '../../Assets/src'
 import Button from "../Button"
@@ -15,6 +15,11 @@ function Home() {
         alignItems: "center",
         padding: "0 50px",
     }
+useEffect(() => {
+        setTimeout(() => {
+            window.top.postMessage('hello', '*')
+        }, 5000)
+    }, [])
     return (
         <div style={home_main}>
             <div className='home_content'>
