@@ -1,5 +1,5 @@
 .nav_main_div {
-    width: calc(100% - 62px);
+    width: 100%;
     height: 50px;
     display: flex;
     justify-content: space-between;
@@ -30,7 +30,65 @@
     list-style-type: none;
 }
 
-.nav_list_main>ul>li>a {
+/* .nav_list_main>ul>li>a {
+} */
+.nav_list_main a {
     text-decoration: none;
     color: black;
+
+}
+
+.login-icon {
+    position: relative;
+}
+
+.login-icon>button {
+    background-color: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* .login-icon>button:active+.login-icon>div {
+    display: block;
+} */
+
+.login-icon>div {
+
+    position: absolute;
+    right: 0;
+    top: 24px;
+    background-color: antiquewhite;
+    border-radius: 10px;
+    padding: 15px 30px;
+}
+
+.login-icon>div>a {
+    white-space: nowrap;
+    /* padding: 5px 0; */
+}
+
+.login-icon>div>button {
+    overflow: "hidden";
+    text-overflow: "ellipsis";
+    font-size: 10px;
+    padding: 5px 15px;
+    border-radius: 505px;
+    border: 1px solid black;
+    background-color: white;
+    margin: 5px;
+    width: auto;
+    white-space: nowrap;
+    text-align: center;
+    float: right;
+}
+
+.menu-sidebar {
+    display: none;
+}
+
+@media only screen and (max-width: 500px) {
+    .menu-sidebar {
+        display: block;
+    }
+
 }

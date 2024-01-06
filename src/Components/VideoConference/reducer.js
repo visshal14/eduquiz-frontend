@@ -6,7 +6,13 @@ export const initialState = {
     isScreenShare: false,
     micStatus: "on",
     camStatus: "on",
-    myScreenShare: false
+    myScreenShare: false,
+    isWhiteBoard: false,
+    isHost: false,
+    email: "",
+    roomDetail: {},
+    remoteAccess: false,
+    currentRemoteAccessUser: {}
 };
 
 const reducer = (state, action) => {
@@ -49,15 +55,40 @@ const reducer = (state, action) => {
                 ...state,
                 camStatus: action.mic
             }
-        // case "SET_SCREENSTATUS":
-        //     return {
-        //         ...state,
-        //         isScreenShare: action.screen
-        //     }
+        case "SET_WHITEBOARD":
+            return {
+                ...state,
+                isWhiteBoard: action.whiteboard
+            }
         case "SET_MYSCREEN":
             return {
                 ...state,
                 myScreenShare: action.screen
+            }
+        case "SET_HOST":
+            return {
+                ...state,
+                isHost: action.host
+            }
+        case "SET_EMAIL":
+            return {
+                ...state,
+                email: action.email
+            }
+        case "SET_ROOMDETAIL":
+            return {
+                ...state,
+                roomDetail: action.roomDetail
+            }
+        case "SET_REMOTEACCESS":
+            return {
+                ...state,
+                remoteAccess: action.remoteAccess
+            }
+        case "SET_CURRENTREMOTEACCESSUSER":
+            return {
+                ...state,
+                currentRemoteAccessUser: action.remoteAccess
             }
         default:
             return state;

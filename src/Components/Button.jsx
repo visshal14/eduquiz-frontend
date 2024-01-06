@@ -1,5 +1,8 @@
 
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
+
+
+
 function Button({ name, font, link, padding, id, value, bgcolor }) {
     name = name || "Hello"
     font = font || "25"
@@ -14,7 +17,7 @@ function Button({ name, font, link, padding, id, value, bgcolor }) {
         if (padding > "10") {
             setWidth("auto")
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line 
     }, [])
     window.addEventListener("resize", function (event) {
         if (padding === "10") {
@@ -37,13 +40,8 @@ function Button({ name, font, link, padding, id, value, bgcolor }) {
         whiteSpace: "nowrap",
         textAlign: "center",
 
-        // animation: `2s ${spin} 2s infinite`,
-        // transform: "translateX(-100 %)",
     };
 
-    // let setLink = () => {
-    //     window.location.href = link
-    // }
     return (
         <button value={value} id={id} onClick={() => { link?.toString().charAt(0) === "/" ? window.location.href = link : link() }} style={mstyle} > {name}</button >
     );

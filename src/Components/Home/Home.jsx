@@ -24,12 +24,12 @@ useEffect(() => {
         <div style={home_main}>
             <div className='home_content'>
                 <div className='home_name' style={{ fontSize: "50px", color: "white" }}>
-                    Eduquiz
+                    Quiz
                 </div>
                 <div className='home_description' style={{ fontSize: "25px", color: "white" }}>
                     Best platform to test your ability and learn according to them
                     <br />
-                    <Button name={"Get Started"} font={"30"} link={"/courseSelection"} padding={"60"} />
+                    <Button name={"Get Started"} font={"30"} link={"/student/login/0"} padding={"60"} />
                 </div>
             </div>
         </div>

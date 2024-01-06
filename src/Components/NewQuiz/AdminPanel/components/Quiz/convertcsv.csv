@@ -1,0 +1,16 @@
+_id,answer,option1,option2,option3,option4,question,serialNo
+60f2d4ac80c3d4548d462339,literals,const,preprocessor,literals,variables,The constants are also called as _____________,9
+60f2d4ac80c3d4548d46233c,VAR_1234,7var_name,7VARNAME,VAR_1234,$var_name,Which of the following is a correct identifier in C++?,1
+60f2d4ac80c3d4548d462341,conditional,conditional,relational,casting operator,unrelational,What is this operator called ?:?,12
+60f2d4ac80c3d4548d462340,1 bit,1 bit,1 byte,4 bytes,2 bytes,What is the size of a boolean variable in C++?,7
+60f2d4ac80c3d4548d462338,both // comment or /* comment */,// comment,/* comment */,both // comment or /* comment */,// comment */,Which of the following is used for comments in C++,3
+60f2d4ac80c3d4548d46233e,postfix,postfix,unary,shift,equality,Which operator is having the highest precedence?,11
+60f2d4ac80c3d4548d46233a,&,*,&,_,%,Which of the following is called address operator?,2
+60f2d4ac80c3d4548d46233f,Encapsulation,Abstraction,Encapsulation,Polymorphism,Modularity,Wrapping data and its related functionality into a single entity is known as _____________,5
+60f2d4ac80c3d4548d46233b,both const keyword and #define preprocessor,const keyword,#define preprocessor,both const keyword and #define preprocessor,$define,How are the constants declared?,10
+60f2d4ac80c3d4548d46233d,Parameters with which functions are called,Parameters with which functions are called,Parameters which are used in the definition of a function,Variables other than passed parameters in a function,Variables that are never used in the function,What are the actual parameters in C++?,4
+60f2d4ac80c3d4548d462342,cout.put(ch),cout.putline(ch),write(ch),cout.put(ch),printf(ch),Which function is used to write a single character to console in C++?,13
+60f2d4ac80c3d4548d462344,\t,\t,\t\r,\b,\a,Which of the following escape sequence represents tab?,14
+60f2d4ac80c3d4548d462343,>>,<<,>>,>,<,Which of the following is called extraction/get from operator?,15
+60f2d4ac80c3d4548d462345,cin is a stream object whereas scanf() is a function,both are the same,cin is a stream object whereas scanf() is a function,scanf() is a stream object whereas cin is a function,cin is used for printing whereas scanf() is used for reading input,Which of the following is the correct difference between cin and scanf()?,8
+60f2d4ac80c3d4548d462346,cin,cin,cout,print,input,Which of the following is C++ equivalent for scanf()?,6

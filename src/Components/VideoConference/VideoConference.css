@@ -51,7 +51,7 @@
 }
 
 .room_idCopy {
-    padding: 0 10px !important;
+    padding: 0 0 0 5px !important;
     border-left: 1px solid white;
     margin-left: 10px;
     cursor: pointer;
@@ -62,10 +62,17 @@
     align-items: center;
 
     color: white;
-    padding: 15px 30px;
+    padding: 10px 20px;
+    font-weight: 800;
     border-radius: 10px;
     background-color: #d95240;
     border: transparent;
+}
+
+
+.navigation_btn {
+    display: flex;
+    align-items: center;
 }
 
 .navigation_btn>button {
@@ -108,4 +115,10 @@
 
 .video-thumbnail {
     height: 100px;
+}
+
+.tempVideo {
+    position: absolute;
+    z-index: 2;
+    top: 0;
 }

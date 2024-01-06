@@ -1,7 +1,8 @@
 .login_main {
     width: 100%;
     height: 100%;
-    background: url("../../Assets/index.png");
+    /* background: url("../../Assets/index.png"); */
+    background: white !important;
     background-position: center;
     background-size: cover;
     display: flex;
