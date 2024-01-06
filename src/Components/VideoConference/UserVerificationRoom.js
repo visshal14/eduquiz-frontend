@@ -8,6 +8,5 @@ export const UserVerificationRoom = (id, status) => {
             if (response.data.errMsg) {
                 window.location.href = `/room-selection/${id}/hello`
             }
-
         });
 }

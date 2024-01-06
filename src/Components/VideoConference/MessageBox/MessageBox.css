@@ -1,6 +1,6 @@
 .msg_main {
 
-    height: calc(100% - 150px);
+    height: 100%;
     border-radius: 10px;
     background-color: rgb(43, 45, 46);
     padding: 15px;
@@ -8,8 +8,40 @@
 
 }
 
+.parti-main {
+    position: absolute;
+    max-height: 400px;
+    width: calc(100% - 30px);
+    border-radius: 10px;
+    overflow-y: scroll;
+    /* height: 0; */
+    top: 15px;
+    background-color: rgb(27, 26, 29);
+    /* max-width: 80%; */
+    padding: 15px;
 
+}
 
+.parti-main::-webkit-scrollbar {
+    display: none;
+}
+
+.total-parti-main {
+    display: flex;
+    justify-content: space-between;
+}
+
+.list-parti {
+    border-radius: 10px;
+    background-color: rgb(46, 45, 48);
+    padding: 15px;
+}
+
+.single-parti {
+    display: flex;
+    justify-content: space-between;
+    margin: 5px 0;
+}
 
 
 .msgs_box {
@@ -49,7 +81,7 @@
 
 
 .writeMsg_box {
-    width: calc(100% - 40px);
+    width: calc(100% - 30px);
     background-color: rgb(27, 26, 29);
     position: absolute;
     bottom: 15px;

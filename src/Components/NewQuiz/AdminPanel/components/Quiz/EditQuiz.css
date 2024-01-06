@@ -1,0 +1,153 @@
+.editQuiz-main {
+    width: 100%;
+    /* padding: 50px; */
+}
+
+.editQuiz-main>table,
+.seeQuiz-main>table {
+    /* overflow: hidden; */
+    border-radius: 15px;
+    border: 1px solid #D9D9D9;
+    width: 100%;
+    border-collapse: collapse;
+    /* border-style: hidden; */
+}
+
+.editQuiz-table-head>th {
+    color: #414141;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    padding: 10px;
+    color: #7A7A7A;
+
+}
+
+.editQuiz-main>table>tbody>tr,
+.seeQuiz-main>table>tbody>tr {
+    border: 1px solid #D9D9D9;
+    margin: 0;
+}
+
+.editQuiz-main>table>tbody>tr>td,
+.seeQuiz-main>table>tbody>tr>td {
+    padding: 10px;
+    text-align: center;
+}
+
+.editQuiz-main>table>tbody>tr>td>button {
+    background-color: #ffffff;
+    color: #308C99;
+    border: 2px solid #308C99;
+    border-radius: 100px;
+    padding: 10px;
+    font-size: 15px;
+    height: 30px;
+    width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* margin-left: 20px; */
+}
+
+.editQuiz-main>table>tbody>tr>td>button>.MuiSvgIcon-root {
+    width: 16px;
+    height: 16px;
+}
+
+.editQuiz-main>table>tbody>tr>td>button:active,
+.seeQuiz-main>table>tbody>tr>td>button:active,
+.see-all-students>table>tbody>tr>td>button:active {
+    background-color: #308C99;
+    color: #ffffff;
+}
+
+
+.seeQuiz-main>table>tbody>tr>td>button,
+.see-all-students>table>tbody>tr>td>button {
+    background-color: #ffffff;
+    color: #308C99;
+    border: 2px solid #308C99;
+
+    /* border: none; */
+    border-radius: 100px;
+    padding: 5px 10px !important;
+    font-size: 12px;
+    /* height: 50px; */
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+
+.declaredResult {
+    width: fit-content !important;
+    padding-top: 50px !important;
+    display: flex;
+    align-items: center;
+}
+
+.declaredResult>input {
+
+    margin: 0 20px !important;
+    /* margin-right: 10px; */
+    width: 20px !important;
+    height: 20px !important;
+}
+
+.remove-add-button-div {
+    width: fit-content !important;
+
+}
+
+
+
+.edit-quiz-overlay {
+
+    overflow-y: auto;
+    height: calc(100% - 200px);
+    border-radius: 10px;
+    background-color: white;
+    top: 100px;
+    width: calc(100% - 200px);
+    left: 100px;
+    position: absolute;
+    padding: 50px;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.close-btn.MuiSvgIcon-root {
+    float: right;
+}
+
+
+
+@media only screen and (max-width: 1000px) {
+    .editQuiz-table-head>th {
+        font-size: 12px;
+    }
+
+    .editQuiz-main>table>tbody>tr>td {
+        font-size: 12px
+    }
+}
+
+@media only screen and (max-width: 700px) {
+    .edit-quiz-overlay {
+        padding: 50px 10px;
+        width: calc(100% - 100px);
+        left: 50px;
+    }
+}
+
+@media only screen and (max-width: 500px) {
+    .edit-quiz-overlay {
+        padding: 10px 10px;
+        width: calc(100% - 20px);
+        left: 10px;
+    }
+}

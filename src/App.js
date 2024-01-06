@@ -1,22 +1,24 @@
+import { lazy, Suspense, useState } from 'react';
 
 import './App.css';
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Home from './Components/Home/Home';
 import Navbar from './Components/Navbar/Navbar';
-import CourseSelection from './Components/CourseSelection/CourseSelection';
-import QuizPage from './Components/QuizPage/QuizPage';
-import Quiz from './Components/Quiz/Quiz';
-import VideoPage from './Components/VideoPage/VideoPage';
-import Login from "./Components/ Login & Register/Login";
-import Register from './Components/ Login & Register/Register';
-import ForgetPassword from './Components/ForgetPassword/ForgetPassword';
-import PasswordReset from './Components/ForgetPassword/PasswordReset';
+
+// import Login from "./Components/ Login & Register/Login";
+// import Register from './Components/ Login & Register/Register';
 import RoomSelection from './Components/RoomSelection/RoomSelection';
-import VideoConference from './Components/VideoConference/VideoConference';
 import { DataLayer } from "./Components/VideoConference/DataLayer"
-import Whiteboard from './Components/Whiteboard/Whiteboard';
-import { useParams } from 'react-router-dom';
-import { v4 as uuid } from 'uuid';
+import AdminPanel from './Components/NewQuiz/AdminPanel/AdminPanel';
+import StudentPanel from './Components/NewQuiz/StudentPanel/StudentPanel';
+import TakingQuiz from './Components/NewQuiz/StudentPanel/TakingQuiz';
+import AdminLogin from "./Components/NewQuiz/AdminPanel/components/Login/AdminLogin"
+import TeacherPanel from './Components/NewQuiz/TeacherPanel/TeacherPanel';
+import TeacherLogin from './Components/NewQuiz/TeacherPanel/TeacherLogin';
+import ThankYou from './Components/NewQuiz/StudentPanel/ThankYou';
+import TempLogin from "./Components/ Login & Register/TempLogin"
+
+const VideoConference = lazy(() => import("./Components/VideoConference/VideoConference"))
 //navbar
 //frontpage
 //courseselect
@@ -33,50 +35,60 @@ import { v4 as uuid } from 'uuid';
 
 
 function App() {
+
+  const [isSmallSidebar, setIsSmallSidebar] = useState(false)
+
+  const sideBarClose = () => {
+
+    setIsSmallSidebar(!isSmallSidebar)
+  }
+
+
   return (
     <div className="App">
-      <Navbar />
+      <Navbar sidebarFunc={sideBarClose} />
       <BrowserRouter>
         <Routes>
           <Route exact path="/" element={<Home />} />
-          <Route exact path="/courseSelection" element={<CourseSelection />} />
-          <Route path="/quizpage/:course" element={<QuizPage />} />
-          <Route path="/quiz/:course" element={<Quiz />} />
-          <Route path="/videopage/:course/:id" element={<VideoPage />} />
-          <Route path="/login/:navigateNo" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/forget-password" element={<ForgetPassword />} />
-          <Route path="/password-reset/:id" element={<PasswordReset />} />
+          <Route path="/student/login/:navigateNo" element={<TempLogin />} />
+          {/* <Route path="/register" element={<Register />} /> */}
           <Route path="/room-selection/:id/:status" element={<RoomSelection />} />
           <Route path="/conference/:id/:status" element={
-            <DataLayer >
-              <VideoConference />
-            </DataLayer>
-
+            <Suspense fallback={<LoadingComponent />}>
+              <DataLayer >
+                <VideoConference />
+              </DataLayer>
+            </Suspense>
           } />
-          <Route exact path="/whiteboard" element={<WhiteBoardUniqueId />} />
-          <Route exact path="/whiteboard/:id" element={<Whiteboard />} />
 
 
+          <Route path="/admin/:id" element={<AdminPanel isSidebar={isSmallSidebar} sidebarFunc={sideBarClose} />} />
+          <Route path="/admin/login/0" element={<AdminLogin />} />
+          <Route path="/student" element={<StudentPanel />}>
+            <Route path=":id" element={<StudentPanel />} />
+          </Route>
+          <Route path="/takingQuiz/:id" element={<TakingQuiz />} />
+          <Route path="/thankyou" element={<ThankYou />} />
+          <Route path="/teacher" element={<TeacherPanel isSidebar={isSmallSidebar} sidebarFunc={sideBarClose} />} >
+            <Route path=":teacherId/:id" element={<TeacherPanel isSidebar={isSmallSidebar} sidebarFunc={sideBarClose} />} />
+          </Route>
+          <Route path="/teacher/login/0" element={<TeacherLogin />} />
         </Routes>
+
+
+
+
       </BrowserRouter>
     </div>
   );
 }
 
-const WhiteBoardUniqueId = () => {
-  const { id } = useParams()
-  console.log(id)
-  if (!id) {
-    console.log("if")
-    const unique_id = uuid();
-    const small_id = unique_id.slice(0, 8)
-    console.log(small_id)
-    window.location.href = `/whiteboard/${small_id}`
-    // Navigate(`/whiteboard/${small_id}`)
-  }
-  // return (<></>)
+const LoadingComponent = () => {
+  return (
+    <p>Loading....</p>
+  )
 }
+
 
 
 export default App;

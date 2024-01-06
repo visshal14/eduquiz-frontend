@@ -1,6 +1,7 @@
 * {
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
 }
 
 body {
@@ -11,6 +12,6 @@ body {
 
 .App {
   width: 100vw;
-  overflow: hidden;
+  overflow-x: hidden;
   height: 100vh;
 }
