@@ -33,6 +33,7 @@ const StudentPanel = () => {
     }, [id])
     const getDetails = (ele) => {
         // setDetailedQuiz(ele)
+        console.log(ele)
         setDetailedQuiz(ele.result?.[0]?.questionAttempted)
 
     }
@@ -83,7 +84,13 @@ const StudentPanel = () => {
                                 <td>{ele.owner.name}</td>
                                 <td>{ele.no_of_question_to_attempt}</td>
                                 <td>{ele.result?.[0].result}</td>
-                                <td>{!ele.can_release_result ? <button onClick={() => window.location = `/takingQuiz/${ele.quizId}`}>Start</button> : <button onClick={() => getDetails(ele)}>Answer Key</button>}</td>
+                                <td>
+                                    {!ele.can_release_result
+                                        ? <button onClick={() => window.location = `/takingQuiz/${ele.quizId}`}>Start</button>
+                                        :
+                                        ele.result?.[0]?.questionAttempted ? <button onClick={() => getDetails(ele)}>Answer Key</button> :
+                                            ""}
+                                </td>
                             </tr>
                         )}
                     </tbody>
