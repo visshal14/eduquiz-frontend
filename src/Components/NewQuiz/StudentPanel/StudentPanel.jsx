@@ -33,7 +33,7 @@ const StudentPanel = () => {
     }, [id])
     const getDetails = (ele) => {
         // setDetailedQuiz(ele)
-        console.log(ele)
+        // console.log(ele)
         setDetailedQuiz(ele.result?.[0]?.questionAttempted)
 
     }
