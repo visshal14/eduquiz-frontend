@@ -1,6 +1,6 @@
 //for localhost
 const url = "http://localhost:3000"
-const backendUrl = "http://localhost:4000"
+// const backendUrl = "http://localhost:4000"
 const peerPort = "4000"
 const peerSecure = false
 
@@ -14,7 +14,7 @@ const peerSecure = false
 
 
 // const url = "https://quiz.langmainternational.com"
-// const backendUrl = "https://quiz-backend-ppaq.onrender.com"
+const backendUrl = "https://quiz-backend-ppaq.onrender.com"
 // const backendUrl = "https://www.quiz-backend.online"
 export default url
 export { backendUrl, peerPort, peerSecure }
