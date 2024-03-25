@@ -13,8 +13,9 @@ const peerSecure = false
 // const peerSecure = true
 
 
-// const url = "https://quiz.langmainternational.com"
-const backendUrl = "https://quiz-backend-ppaq.onrender.com"
-// const backendUrl = "https://www.quiz-backend.online"
+
+const backendUrl = "https://eduquiz001.onrender.com"
+
+
 export default url
 export { backendUrl, peerPort, peerSecure }
