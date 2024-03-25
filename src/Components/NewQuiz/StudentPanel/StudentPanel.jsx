@@ -36,9 +36,9 @@ const StudentPanel = () => {
         setDetailedQuiz(ele.result?.[0]?.questionAttempted)
 
     }
-    useEffect(() => {
-        console.log(detailedQuiz)
-    }, [detailedQuiz])
+    // useEffect(() => {
+    //     console.log(detailedQuiz)
+    // }, [detailedQuiz])
     const closeBtn = () => {
         setDetailedQuiz(null)
     }
