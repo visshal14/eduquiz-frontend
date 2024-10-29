@@ -177,8 +177,7 @@ const StudentPanel = () => {
                             <th>Id</th>
                             <th>Teacher Name</th>
                             <th>Password</th>
-                            {/* <th>Option 4</th> */}
-                            {/* <th><a href={`https://boisterous-piroshki-f8242f.netlify.app/conference/${ele.meeting_id}/hello`} rel="noreferrer" target="_blank">Start Link</a></th> */}
+
 
                         </tr>
                     </thead>
@@ -192,7 +191,7 @@ const StudentPanel = () => {
                                 <td>{ele.admin_details?.name}</td>
                                 <td>{ele.password}</td>
                                 <td> <a href={`${frontendUrl}/conference/${ele.meeting_id}/hello`} rel="noreferrer" target="_blank">Join</a></td>
-                                {/* <td>{ele.answer}</td> */}
+
                             </tr>
                         )}
                     </tbody>
