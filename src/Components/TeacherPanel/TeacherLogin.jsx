@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 // import Button from '../../Button'
 import { useNavigate } from 'react-router-dom';
-import axios from '../../../axios';
+import axios from '../../axios';
 import { Person, School } from '@mui/icons-material';
 function TeacherLogin() {
     const navigate = useNavigate();

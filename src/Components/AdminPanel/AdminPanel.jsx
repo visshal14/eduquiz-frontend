@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import "./AdminPanel.css"
 import Sidebar from './Sidebar/Sidebar'
 import RightMain from './components/RightMain'
-import axios from "../../../axios"
+import axios from "../../axios"
 const AdminPanel = ({ isSidebar, sidebarFunc }) => {
 
 

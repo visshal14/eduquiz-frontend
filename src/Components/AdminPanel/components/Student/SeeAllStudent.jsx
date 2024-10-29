@@ -1,29 +1,40 @@
 import React, { useEffect, useState } from 'react'
-import axios from "../../../../../axios"
+import axios from "../../../../axios"
 import { Close } from '@mui/icons-material'
-const SeeAllTeacher = () => {
-    const [teacher, setTeacher] = useState([])
-    const [detailedTeacher, setDetailedTeacher] = useState()
-    useEffect(() => {
-        axios.get("/getAllTeacher").then((response) => {
+const SeeAllStudent = () => {
+    const [student, setStudent] = useState([])
+    const [detailedStudent, setDetailedStudent] = useState()
 
+    useEffect(() => {
+        axios.get("/getAllStudent").then((response) => {
+            // console.log(response.data)
             if (response.data.errMsg) return alert("Error")
-            setTeacher(response.data)
+            setStudent(response.data)
+            // console.log(response.data)
         })
     }, [])
-
-
     const getDetails = (ele) => {
-        setDetailedTeacher(ele)
+
+        let temp = ele
+        // eslint-disable-next-line
+        temp.quizes.map((e, i) => {
+            if (typeof (e.result) === "object") {
+                // eslint-disable-next-line
+                e.result.map((r) => {
+                    if (r.student === temp.id) {
+                        ele.quizes[i].result = r.result
+                    }
+                })
+            }
+        }
+        )
+        // console.log(ele)
+        setDetailedStudent(ele)
         // console.log(ele)
     }
-    const startLink = (ele) => {
-        window.location.href = `/conference/${ele}/hello`
-    }
     const closeBtn = () => {
-        setDetailedTeacher(null)
+        setDetailedStudent(null)
     }
-
     return (
         <div className='seeQuiz-main'>
             <table>
@@ -34,13 +45,15 @@ const SeeAllTeacher = () => {
 
                         {/* <th>question</th> */}
                         <th>Email</th>
-                        <th>Quizzes</th>
+
+
+
                     </tr>
 
                 </thead>
                 <tbody>
 
-                    {teacher?.map((ele, i) =>
+                    {student && student?.map((ele, i) =>
 
                         <tr key={i}>
                             <td>{ele.id}</td>
@@ -48,7 +61,6 @@ const SeeAllTeacher = () => {
 
                             {/* <td>{ele.questions}</td> */}
                             <td>{ele.email}</td>
-                            <td>{ele.quizes.length}</td>
                             <td><button onClick={() => getDetails(ele)}>Get Details</button></td>
 
                         </tr>
@@ -57,11 +69,8 @@ const SeeAllTeacher = () => {
 
                 </tbody>
             </table>
-
-            {detailedTeacher &&
-
+            {detailedStudent &&
                 <div className='edit-quiz-overlay'>
-
                     <div><Close onClick={closeBtn} className='close-btn' /></div>
                     <div className='see-all-details'>
 
@@ -73,18 +82,17 @@ const SeeAllTeacher = () => {
                                         <th>Quiz id</th>
                                         <th>Quiz name</th>
                                         <th>No of Question</th>
-                                        <th>Question to attempt</th>
-                                        <th>Students Attempted</th>
+                                        <th>Result</th>
+
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {detailedTeacher?.quizes.map((ele, i) =>
+                                    {detailedStudent?.quizes.map((ele, i) =>
                                         <tr key={i}>
                                             <td>{ele.quizId}</td>
                                             <td>{ele.name}</td>
-                                            <td>{ele.question.length}</td>
                                             <td>{ele.no_of_question_to_attempt}</td>
-                                            <td>{ele.result.length}</td>
+                                            <td>{ele.result[0]?.student ? "" : ele.result ? ele.result : ""}</td>
                                         </tr>
                                     )}
                                 </tbody>
@@ -104,14 +112,14 @@ const SeeAllTeacher = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {detailedTeacher?.room.map((ele, i) =>
+                                    {detailedStudent?.room.map((ele, i) =>
                                         <tr key={i}>
                                             <td>{ele.meeting_id}</td>
                                             <td>{ele.name}</td>
                                             <td>{ele.password}</td>
                                             <td>{ele.time}</td>
                                             <td>{ele.date}</td>
-                                            <td><button onClick={() => startLink(ele.meeting_id)}>Join</button></td>
+                                            {/* <td><button onClick={() => startLink(ele.meeting_id)}>Join</button></td> */}
                                         </tr>
                                     )}
                                 </tbody>
@@ -126,4 +134,4 @@ const SeeAllTeacher = () => {
     )
 }
 
-export default SeeAllTeacher
+export default SeeAllStudent

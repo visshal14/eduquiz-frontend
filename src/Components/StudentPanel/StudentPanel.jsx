@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import axios from "../../../axios"
+import axios from "../../axios"
 import "./Student.css"
-import frontendUrl from '../../../frontendUrl'
+import frontendUrl from '../../frontendUrl'
 import { Close } from '@mui/icons-material'
 const StudentPanel = () => {
     const { id } = useParams()

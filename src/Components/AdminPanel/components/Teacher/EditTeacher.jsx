@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import axios from "../../../../../axios"
+import axios from "../../../../axios"
 import { Close, Edit } from '@mui/icons-material'
 
 const EditTeacher = () => {

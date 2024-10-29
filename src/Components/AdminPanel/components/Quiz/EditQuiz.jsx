@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import axios from "../../../../../axios"
+import axios from "../../../../axios"
 import "./EditQuiz.css"
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';

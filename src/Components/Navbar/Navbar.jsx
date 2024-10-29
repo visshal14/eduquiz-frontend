@@ -23,7 +23,7 @@ function Navbar({ sidebarFunc }) {
                 <Menu onClick={sidebarFunc} />
             </div>
             <div className='nav_logo'>
-                <a className="nav_content_col" href="/">Quiz</a>
+                <a className="nav_content_col" href="/">EduQuiz</a>
             </div>
             <div className='nav_list_main'>
                 <ul>

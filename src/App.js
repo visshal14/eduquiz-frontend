@@ -7,15 +7,15 @@ import Navbar from './Components/Navbar/Navbar';
 
 // import Login from "./Components/ Login & Register/Login";
 // import Register from './Components/ Login & Register/Register';
-import RoomSelection from './Components/RoomSelection/RoomSelection';
+// import RoomSelection from './Components/RoomSelection/RoomSelection';
 import { DataLayer } from "./Components/VideoConference/DataLayer"
-import AdminPanel from './Components/NewQuiz/AdminPanel/AdminPanel';
-import StudentPanel from './Components/NewQuiz/StudentPanel/StudentPanel';
-import TakingQuiz from './Components/NewQuiz/StudentPanel/TakingQuiz';
-import AdminLogin from "./Components/NewQuiz/AdminPanel/components/Login/AdminLogin"
-import TeacherPanel from './Components/NewQuiz/TeacherPanel/TeacherPanel';
-import TeacherLogin from './Components/NewQuiz/TeacherPanel/TeacherLogin';
-import ThankYou from './Components/NewQuiz/StudentPanel/ThankYou';
+import AdminPanel from './Components/AdminPanel/AdminPanel';
+import StudentPanel from './Components/StudentPanel/StudentPanel';
+import TakingQuiz from './Components/StudentPanel/TakingQuiz';
+import AdminLogin from "./Components/AdminPanel/components/Login/AdminLogin"
+import TeacherPanel from './Components/TeacherPanel/TeacherPanel';
+import TeacherLogin from './Components/TeacherPanel/TeacherLogin';
+import ThankYou from './Components/StudentPanel/ThankYou';
 import TempLogin from "./Components/ Login & Register/TempLogin"
 
 const VideoConference = lazy(() => import("./Components/VideoConference/VideoConference"))
@@ -52,7 +52,7 @@ function App() {
           <Route exact path="/" element={<Home />} />
           <Route path="/student/login/:navigateNo" element={<TempLogin />} />
           {/* <Route path="/register" element={<Register />} /> */}
-          <Route path="/room-selection/:id/:status" element={<RoomSelection />} />
+          {/* <Route path="/room-selection/:id/:status" element={<RoomSelection />} /> */}
           <Route path="/conference/:id/:status" element={
             <Suspense fallback={<LoadingComponent />}>
               <DataLayer >

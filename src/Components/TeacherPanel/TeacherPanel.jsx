@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import Sidebar from './Sidebar'
 import RightMain from './RightMain'
-import axios from "../../../axios"
+import axios from "../../axios"
 import { useParams } from 'react-router-dom'
 const TeacherPanel = ({ isSidebar, sidebarFunc }) => {
     const { teacherId } = useParams()

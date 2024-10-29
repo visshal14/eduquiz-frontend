@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
-import axios from "../../../../../axios"
-const CreateStudent = () => {
+import axios from "../../../../axios"
+import "./Teacher.css"
+const CreateTeacher = () => {
+
 
     const [name, setName] = useState("")
     const [email, setEmail] = useState("")
@@ -14,7 +16,7 @@ const CreateStudent = () => {
         if (name === "" || email === "" || password === "") return
 
 
-        axios.post(`/addNewStudent`, {
+        axios.post(`/addNewTeacher`, {
             name, email, password
 
         }).then((response) => {
@@ -39,26 +41,29 @@ const CreateStudent = () => {
             <div className='top-div'>
 
                 <div>
-
-                    <label htmlFor="name">Name:</label>
+                    <label htmlFor="fname">Name:</label>
                     <input type="text" id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} />
                 </div>
 
                 <div>
-
                     <label htmlFor="lname">Email:</label>
                     <input type="text" id="email" name="email" value={email} onChange={(e) => setEmail(e.target.value)} />
                 </div>
                 <div>
+
                     <label htmlFor="lname">Password:</label>
                     <input type="password" id="password" name="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-
                 </div>
-
             </div>
             <button onClick={submit} className='submitBtn'>submit</button>
+
+
+
+
+
+
         </div>
     )
 }
 
-export default CreateStudent
+export default CreateTeacher

@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react'
-import axios from "../../../../../axios"
-const DeleteStudent = () => {
-    const [student, setStudent] = useState([])
-    const getStudent = () => {
+import axios from "../../../../axios"
+const DeleteTeacher = () => {
+    const [teacher, setTeacher] = useState([])
+    const getTeacher = () => {
 
 
-        axios.get("/getAllStudent").then((response) => {
+        axios.get("/getAllTeacher").then((response) => {
             if (response.data.errMsg) return alert("Error")
-            setStudent(response.data)
+            console.log(response.data)
+            setTeacher(response.data)
         })
     }
     useEffect(() => {
-        getStudent()
+        getTeacher()
     }, [])
 
     const deleteQuiz = (id) => {
-
-        axios.post(`/deleteStudent`, {
+        // console.log(id)
+        axios.post(`/deleteTeacher`, {
             id
         }).then((response) => {
             if (response.data.errMsg) return alert("Error")
-            getStudent()
+            getTeacher()
 
         })
             .catch(function (error) {
@@ -29,13 +30,9 @@ const DeleteStudent = () => {
 
 
     }
-
-
-
-
     return (
         <div>
-            {student?.map((ele, i) =>
+            {teacher?.map((ele, i) =>
                 <div key={i}>{i + 1}. {ele.id} {ele.name}
                     <button onClick={() => deleteQuiz(ele.id)}>Delete</button>
                 </div>
@@ -47,4 +44,4 @@ const DeleteStudent = () => {
 
 }
 
-export default DeleteStudent
+export default DeleteTeacher

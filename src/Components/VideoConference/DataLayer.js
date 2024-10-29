@@ -871,7 +871,7 @@ export const DataLayer = ({ children }) => {
 
     const leave_button = () => {
         socket.close();
-        window.location.href = "/room-selection/id/p"
+        window.location.href = "/"
     }
 
 
