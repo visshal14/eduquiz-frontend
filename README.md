@@ -1,70 +1,27 @@
-# Getting Started with Create React App
+# EduQuiz
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**EduQuiz** is a dynamic platform for creating, sharing, and managing quizzes across various topics. Built with **React JS, WebRTC, PeerJS, Node.js, and Socket.io**, it provides an interactive experience for both teachers and students, fostering engagement and collaboration.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Interactive Quiz Management**: A user-friendly teacher panel allows teachers to create and assign quizzes to students across various topics. The streamlined interface supports ease of use and efficient quiz management.
+  
+- **Custom Meetings**: Host live sessions with students and record them for future reference, using **PeerJS** and **Socket.io** for real-time communication and reliable session recording.
 
-### `npm start`
+- **Integrated Custom Whiteboard**: Enable interactive teaching with a live whiteboard feature, allowing teachers to explain concepts and collaborate with students during sessions.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Technology Stack
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+- **Frontend**: React JS, WebRTC, PeerJS, Axios, MUI, Roughjs
+- **Backend**: Node.js, Socket.io, Express, MongoDB, JWT
 
-### `npm test`
+## Usage
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+1. **Teachers** can log in and access the **Teacher Panel** to create and assign quizzes.
+2. Host **live sessions** with students, using the integrated **whiteboard** for interactive teaching.
+3. Record sessions and save for future reference.
 
-### `npm run build`
+## License
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This project is licensed under the MIT License.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
