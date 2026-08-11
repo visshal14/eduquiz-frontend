@@ -1,9 +1,11 @@
-import { lazy, Suspense, useState } from 'react';
+import { lazy, Suspense } from 'react';
 
 import './App.css';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Box, CircularProgress } from "@mui/material";
 import Home from './Components/Home/Home';
 import Navbar from './Components/Navbar/Navbar';
+import ShellProvider from './Components/Layout/ShellContext';
 import { DataLayer } from "./Components/VideoConference/DataLayer"
 import AdminPanel from './Components/AdminPanel/AdminPanel';
 import StudentPanel from './Components/StudentPanel/StudentPanel';
@@ -19,55 +21,49 @@ const VideoConference = lazy(() => import("./Components/VideoConference/VideoCon
 
 function App() {
 
-  const [isSmallSidebar, setIsSmallSidebar] = useState(false)
-
-  const sideBarClose = () => {
-
-    setIsSmallSidebar(!isSmallSidebar)
-  }
-
-
   return (
-    <div className="App">
-      <Navbar sidebarFunc={sideBarClose} />
-      <BrowserRouter>
-        <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route path="/student/login/:navigateNo" element={<TempLogin />} />
+    <BrowserRouter>
+      <ShellProvider>
+        <div className="App">
+          {/* Sticky, and hides itself on /conference — see Navbar. */}
+          <Navbar />
 
-          <Route path="/conference/:id/:status" element={
-            <Suspense fallback={<LoadingComponent />}>
-              <DataLayer >
-                <VideoConference />
-              </DataLayer>
-            </Suspense>
-          } />
+          <Routes>
+            <Route exact path="/" element={<Home />} />
+            <Route path="/student/login/:navigateNo" element={<TempLogin />} />
 
-
-          <Route path="/admin/:id" element={<AdminPanel isSidebar={isSmallSidebar} sidebarFunc={sideBarClose} />} />
-          <Route path="/admin/login/0" element={<AdminLogin />} />
-          <Route path="/student" element={<StudentPanel />}>
-            <Route path=":id" element={<StudentPanel />} />
-          </Route>
-          <Route path="/takingQuiz/:id" element={<TakingQuiz />} />
-          <Route path="/thankyou" element={<ThankYou />} />
-          <Route path="/teacher" element={<TeacherPanel isSidebar={isSmallSidebar} sidebarFunc={sideBarClose} />} >
-            <Route path=":teacherId/:id" element={<TeacherPanel isSidebar={isSmallSidebar} sidebarFunc={sideBarClose} />} />
-          </Route>
-          <Route path="/teacher/login/0" element={<TeacherLogin />} />
-        </Routes>
+            <Route path="/conference/:id/:status" element={
+              <Suspense fallback={<LoadingComponent />}>
+                <DataLayer >
+                  <VideoConference />
+                </DataLayer>
+              </Suspense>
+            } />
 
 
-
-
-      </BrowserRouter>
-    </div>
+            <Route path="/admin/:id" element={<AdminPanel />} />
+            <Route path="/admin/login/0" element={<AdminLogin />} />
+            <Route path="/student" element={<StudentPanel />}>
+              <Route path=":id" element={<StudentPanel />} />
+            </Route>
+            <Route path="/takingQuiz/:id" element={<TakingQuiz />} />
+            <Route path="/thankyou" element={<ThankYou />} />
+            <Route path="/teacher" element={<TeacherPanel />} >
+              <Route path=":teacherId/:id" element={<TeacherPanel />} />
+            </Route>
+            <Route path="/teacher/login/0" element={<TeacherLogin />} />
+          </Routes>
+        </div>
+      </ShellProvider>
+    </BrowserRouter>
   );
 }
 
 const LoadingComponent = () => {
   return (
-    <p>Loading....</p>
+    <Box sx={{ minHeight: '100vh', display: 'grid', placeItems: 'center', bgcolor: '#101014' }}>
+      <CircularProgress sx={{ color: '#fff' }} />
+    </Box>
   )
 }
 

@@ -1322,27 +1322,54 @@ const WhiteBoard = ({ topElement }) => {
 
             <div className='toolbox'>
                 <ul>
-                    <li data-text="select" ><NearMe onClick={() => {
-                        setStrokeType("select")
-                    }} /></li>
-                    <li data-text="Line" ><Create onClick={() => { setStrokeType("line") }} /></li>
-                    <li data-text="Rectangle"><CropSquare onClick={() => { setStrokeType("rect") }} /></li>
-                    <li data-text="Circle"><PanoramaFishEye onClick={() => { setStrokeType("circle") }} /></li>
-                    <li data-text="Ellipse"><PanoramaFishEye onClick={() => { setStrokeType("ellipse") }} /></li>
-                    <li data-text="Pencil"><ModeEditOutline onClick={() => { setStrokeType("pencil") }} /></li>
-                    <li data-text="Eraser"><AutoFixNormal onClick={() => { setStrokeType("eraser") }} /></li>
-                    {/* version 1 */}
-                    <li data-text="Four Sides Star"><StarBorderPurple500 onClick={() => { setStrokeType("fourSidesStar") }} /></li>
-                    {/* version 2 */}
-                    <li data-text="Four Sides Star"><StarBorderPurple500 onClick={() => { setStrokeType("fourSidesStar2") }} /></li>
-                    <li data-text="Clear WhiteBoard"><Clear onClick={clearWhiteBoard} /></li>
-                    <li data-text="Undo"><Undo onClick={undoWhiteBoard} /></li>
-                    <li data-text="Redo"><Redo onClick={redoWhiteBoard} /></li>
-                    <li data-text="Stoke =  5px"><Clear onClick={() => { setStrokeWidth("5") }} /></li>
-                    <li data-text="Stoke =  10px"><Clear onClick={() => { setStrokeWidth("10") }} /></li>
-                    <li data-text="Choose Color"><input type="color" id="colorChoice" name="favcolor" onChange={(e) => {
-                        setCurrentColor(e.target.value)
-                    }} value={currentColor} /></li>
+                    {[
+                        { type: "select", text: "Select", icon: <NearMe /> },
+                        { type: "line", text: "Line", icon: <Create /> },
+                        { type: "rect", text: "Rectangle", icon: <CropSquare /> },
+                        { type: "circle", text: "Circle", icon: <PanoramaFishEye /> },
+                        { type: "ellipse", text: "Ellipse", icon: <PanoramaFishEye /> },
+                        { type: "pencil", text: "Pencil", icon: <ModeEditOutline /> },
+                        { type: "eraser", text: "Eraser", icon: <AutoFixNormal /> },
+                        { type: "fourSidesStar", text: "Star", icon: <StarBorderPurple500 /> },
+                        { type: "fourSidesStar2", text: "Star (alt)", icon: <StarBorderPurple500 /> },
+                    ].map((tool) => (
+                        <li
+                            key={tool.type}
+                            data-text={tool.text}
+                            className={strokeType === tool.type ? "is-active" : undefined}
+                            onClick={() => setStrokeType(tool.type)}
+                        >
+                            {tool.icon}
+                        </li>
+                    ))}
+
+                    <li className="tool-sep" aria-hidden="true"></li>
+
+                    <li
+                        data-text="Thin stroke"
+                        className={strokeWidth === "5" ? "is-active" : undefined}
+                        onClick={() => setStrokeWidth("5")}
+                    >
+                        <span className="stroke-dot stroke-dot--thin"></span>
+                    </li>
+                    <li
+                        data-text="Thick stroke"
+                        className={strokeWidth === "10" ? "is-active" : undefined}
+                        onClick={() => setStrokeWidth("10")}
+                    >
+                        <span className="stroke-dot stroke-dot--thick"></span>
+                    </li>
+                    <li data-text="Colour" className="tool-color">
+                        <input type="color" id="colorChoice" name="favcolor" onChange={(e) => {
+                            setCurrentColor(e.target.value)
+                        }} value={currentColor} />
+                    </li>
+
+                    <li className="tool-sep" aria-hidden="true"></li>
+
+                    <li data-text="Undo" onClick={undoWhiteBoard}><Undo /></li>
+                    <li data-text="Redo" onClick={redoWhiteBoard}><Redo /></li>
+                    <li data-text="Clear board" className="tool-danger" onClick={clearWhiteBoard}><Clear /></li>
                 </ul>
             </div>
         </div>

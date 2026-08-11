@@ -1,37 +1,36 @@
 import React, { useEffect, useState } from 'react'
+import {
+    Box, Button, Card, Chip, Divider, FormControlLabel, IconButton, MenuItem, Stack, Switch,
+    TextField, Tooltip, Typography,
+} from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
+import AddIcon from '@mui/icons-material/Add'
 import axios from "../../../../axios"
-import "./EditQuiz.css"
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
-import AddIcon from '@mui/icons-material/Add';
-import RemoveIcon from '@mui/icons-material/Remove';
-import { Close } from '@mui/icons-material';
+import QuestionEditor from './QuestionEditor'
+import { PageHeader, DataTable, DetailDialog, EmptyState, useFeedback } from '../../../ui'
 
 const EditQuiz = ({ teacher }) => {
+    const notify = useFeedback()
 
     const [name, setName] = useState("")
     const [quizes, setQuizes] = useState([])
     const [isEditTrue, setIsEditTrue] = useState(false)
     const [question, setQuestion] = useState([])
     const [studentEmails, setStudentEmails] = useState(" ")
-    const [releaseResult, setReleaseResult] = useState(Boolean)
+    const [releaseResult, setReleaseResult] = useState(false)
     const [toAttempt, setToAttempt] = useState("")
 
     const [teachers, setTeachers] = useState([])
     const [teacherId, setTeacherId] = useState("")
     const [result, setResult] = useState([])
-
-
-    // useEffect(() => {
-    //     console.log(releaseResult)
-    // }, [releaseResult])
+    const [loading, setLoading] = useState(true)
 
     function getAllQuiz() {
-
         axios.get(`/getAllQuiz/${teacher ? teacher : "all"}`).then((response) => {
-            if (response.data.errMsg) return alert("Error")
+            setLoading(false)
+            if (response.data.errMsg) return notify("Could not load quizzes.", "error")
             setQuizes(response.data)
-            // console.log(response.data)
         })
     }
 
@@ -41,16 +40,12 @@ const EditQuiz = ({ teacher }) => {
             setTeacherId(teacher)
         } else {
             axios.get("/getAllTeacher").then((response) => {
-                // console.log(response.data)
                 if (response.data.errMsg) {
-                    return alert("error, try again")
+                    return notify("Could not load teachers. Try again.", "error")
                 }
                 setTeachers(response.data)
             })
         }
-
-
-
         // eslint-disable-next-line
     }, [teacher])
 
@@ -62,21 +57,18 @@ const EditQuiz = ({ teacher }) => {
         )
         setIsEditTrue(true)
     }
+
     useEffect(() => {
-        // console.log(editQuiz)
         setResult(editQuiz?.result)
         setName(editQuiz.name)
         setQuestion(editQuiz.question)
         setStudentEmails(editQuiz.users || " ")
-        // console.log(editQuiz)
         setReleaseResult(editQuiz.can_release_result || false)
         setToAttempt(editQuiz.no_of_question_to_attempt)
         setTeacherId(editQuiz.owner?.id)
     }, [editQuiz])
 
-
     const submit = () => {
-        // setEditQuiz((prev) => prev.question = question)
         axios.post(`/editQuiz`, {
             teacherId,
             quizId: editQuiz.quizId,
@@ -87,21 +79,19 @@ const EditQuiz = ({ teacher }) => {
             toAttempt,
             result
         }).then((response) => {
-            if (response.data.errMsg) return alert("Error")
-            // console.log(response.data)
-            alert(response.data.msg)
+            if (response.data.errMsg) return notify("Could not save the quiz.", "error")
+            notify(response.data.msg || "Quiz saved.", "success")
             getAllQuiz()
             setIsEditTrue(false)
             setEditQuiz("")
         })
             .catch(function (error) {
                 console.log(error);
+                notify("Could not reach the server.", "error")
             });
-
     }
 
     const NoQuestionAdd = () => {
-
         setQuestion(prev => [...prev, {
             serialNo: prev.length + 1,
             question: "",
@@ -111,230 +101,249 @@ const EditQuiz = ({ teacher }) => {
             option4: "",
             answer: ""
         }])
-
     }
-    const NoQuestionSub = () => {
 
-        // console.log(questions)
-        setQuestion(question.slice(0, -1))
+    const updateQuestion = (index, key, value) => {
+        setQuestion((prev) => prev.map((ele, j) => (index === j ? { ...ele, [key]: value } : ele)))
+    }
+
+    const deleteQuestion = (serialNo) => {
+        setQuestion((prev) => prev
+            .filter((ele) => parseInt(ele.serialNo) !== parseInt(serialNo))
+            .map((ele, i) => ({ ...ele, serialNo: i + 1 })))
     }
 
     const deleteQuiz = (id) => {
-        // console.log(id)
         axios.post(`/deleteQuiz`, {
             id
         }).then((response) => {
-            if (response.data.errMsg) return alert("Error")
+            if (response.data.errMsg) return notify("Could not delete the quiz.", "error")
             setQuizes(response.data)
-            alert("deleted")
-            // console.log(response.data)
+            notify("Quiz deleted.", "success")
         })
             .catch(function (error) {
                 console.log(error);
+                notify("Could not reach the server.", "error")
             });
-
-
     }
-
 
     const closeBtn = () => {
         setIsEditTrue(false)
     }
 
     const toAttemptChanged = (e) => {
-        // console.log(question.length)
         if (e.target.value > question.length) {
-            // console.log("df")
             setToAttempt(question.length)
         } else {
             setToAttempt(e.target.value)
         }
     }
 
-
     const deleteResult = (e) => {
-
-
         setResult((prev) => prev.filter((ele) => ele.id !== e.id))
-
     }
 
+    const columns = [
+        { key: 'quizId', label: 'Quiz ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'owner', label: 'Teacher', render: (row) => row.owner?.name },
+        {
+            key: 'can_release_result',
+            label: 'Results',
+            render: (row) => (
+                <Chip
+                    size="small"
+                    label={row.can_release_result ? 'Released' : 'Held'}
+                    color={row.can_release_result ? 'success' : 'default'}
+                    variant={row.can_release_result ? 'filled' : 'outlined'}
+                />
+            ),
+        },
+        { key: 'question', label: 'Questions', align: 'right', render: (row) => row.question.length },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Stack direction="row" spacing={0.5} justifyContent="flex-end">
+                    <Tooltip title="Edit">
+                        <IconButton size="small" onClick={() => editClick(row.quizId)}>
+                            <EditIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <IconButton
+                            size="small"
+                            onClick={() => deleteQuiz(row.quizId)}
+                            sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
+                        >
+                            <DeleteOutlineIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
+            ),
+        },
+    ]
 
+    const resultColumns = [
+        { key: 'student', label: 'Student ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        {
+            key: 'result',
+            label: 'Marks',
+            align: 'right',
+            render: (row) => `${row.result} / ${editQuiz?.no_of_question_to_attempt}`,
+        },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Tooltip title="Remove this result">
+                    <IconButton
+                        size="small"
+                        onClick={() => deleteResult(row)}
+                        sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}
+                    >
+                        <DeleteOutlineIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+            ),
+        },
+    ]
 
     return (
-        <div className='editQuiz-main'>
-            <table>
-                <thead>
-                    <tr className='editQuiz-table-head'>
-                        <th>Quiz Id</th>
-                        <th>Quiz Name</th>
-                        <th>Teacher Name</th>
+        <Box>
+            <PageHeader
+                title="Edit quiz"
+                subtitle="Pick a quiz to change its details, questions or released results."
+            />
 
-                        {/* <th>question</th> */}
-                        <th>Result Declared</th>
-                        <th>No Of Question</th>
-                        {/* <th>date</th> */}
-                        <th>&nbsp;</th>
-                        <th>&nbsp;</th>
+            <DataTable
+                columns={columns}
+                rows={quizes}
+                loading={loading}
+                getRowKey={(row) => row.quizId}
+                empty={<EmptyState title="No quizzes yet" description="Create one from the Create quiz screen." />}
+            />
 
-                    </tr>
+            <DetailDialog
+                open={isEditTrue}
+                onClose={closeBtn}
+                title={editQuiz?.name || 'Edit quiz'}
+                subtitle={editQuiz?.quizId ? `Quiz ID ${editQuiz.quizId}` : undefined}
+                actions={
+                    <>
+                        <Button color="inherit" onClick={closeBtn}>Cancel</Button>
+                        <Button variant="contained" onClick={submit}>Save changes</Button>
+                    </>
+                }
+            >
+                <Stack spacing={3}>
+                    <Card>
+                        <Box sx={{ px: 3, py: 2.5 }}>
+                            <Typography variant="h5" component="h2">Details</Typography>
+                        </Box>
+                        <Divider />
+                        <Box
+                            sx={{
+                                p: 3,
+                                display: 'grid',
+                                gap: 2.5,
+                                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' },
+                            }}
+                        >
+                            <TextField
+                                label="Quiz name"
+                                value={name || ''}
+                                onChange={(e) => setName(e.target.value)}
+                            />
 
-                </thead>
-                <tbody>
+                            <TextField
+                                label="Questions to attempt"
+                                value={toAttempt ?? ''}
+                                onChange={toAttemptChanged}
+                                helperText={`Capped at ${question?.length || 0}`}
+                            />
 
-                    {quizes && quizes?.map((ele, i) =>
+                            <Box sx={{ gridColumn: '1 / -1' }}>
+                                <TextField
+                                    label="Student emails"
+                                    value={studentEmails || ''}
+                                    onChange={(e) => setStudentEmails(e.target.value)}
+                                    helperText="Separated by commas"
+                                />
+                            </Box>
 
-                        <tr key={i}>
-                            <td>{ele.quizId}</td>
-                            <td>{ele.name}</td>
-                            <td>{ele.owner.name}</td>
-
-                            {/* <td>{ele.questions}</td> */}
-                            <td>{String(ele.can_release_result)}</td>
-                            <td>{ele.question.length}</td>
-                            {/* <td>{ele.date}</td> */}
-                            <td><button onClick={() => editClick(ele.quizId)}><EditIcon /></button></td>
-                            <td><button onClick={() => deleteQuiz(ele.quizId)}><DeleteOutlineIcon /></button></td>
-                        </tr>
-
-                    )}
-
-                </tbody>
-            </table>
-
-
-            {isEditTrue && <div className='edit-quiz-overlay'>
-                <div><Close onClick={closeBtn} className='close-btn' /></div>
-
-                <div className='top-div'>
-
-                    <div>
-                        <label htmlFor="name">Quiz Name</label><br />
-                        <input type="text" id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} />
-                    </div>
-
-                    <div>
-                        <label htmlFor="">Enter Student Mail(separated by comma , )</label>
-                        <input type="text" id="" name="" value={studentEmails} onChange={(e) => setStudentEmails(e.target.value)} />
-                    </div>
-
-                    <div>
-                        <label htmlFor="">How Many Questions To Attempts</label>
-                        <input type="text" id="" name="" value={toAttempt} onChange={toAttemptChanged} />
-                    </div>
-
-
-                    {!teacher && <div>
-                        <label htmlFor="">Select Teacher:</label>
-                        <select name="teacher" id="teacher" value={teacherId} onChange={(e) => setTeacherId(e.target.value)} >
-                            {
-                                teachers?.map((ele, i) =>
-                                    <option key={i} value={ele.id}>{ele.name}</option>
-                                )
-                            }
-                            {/* <option value="volvo">Volvo</option>
-                <option value="saab">Saab</option>
-                <option value="mercedes">Mercedes</option>
-                <option value="audi">Audi</option> */}
-                        </select>
-                    </div>}
-
-                    <div className='declaredResult'>
-                        <input type="checkbox" id="declaredResult" name="" checked={releaseResult}
-                            onChange={(e) => setReleaseResult(!releaseResult)}
-                        />
-                        <label htmlFor="declaredResult">declared result </label>
-                    </div>
-
-
-                    <div className='remove-add-button-div'>
-                        <label htmlFor="">No of Question</label>
-                        <div>
-                            <input type="text" id="" name="" disabled value={question?.length} min={1} readOnly={true} />
-                            <button onClick={NoQuestionAdd}><AddIcon className='questionIcon' /></button>
-                            <button onClick={NoQuestionSub}><RemoveIcon className='questionIcon' /></button>
-                        </div>
-                    </div>
-                </div>
-
-                <div className='see-all-students'><span>Result</span>
-
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Student id</th>
-                                <th>Student name</th>
-                                <th>Marks</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {result?.map((ele, i) =>
-                                <tr key={i}>
-                                    <td>{ele.student}</td>
-                                    <td>{ele.name}</td>
-                                    <td>{ele.result} / {editQuiz?.no_of_question_to_attempt} </td>
-                                    <td><button onClick={() => deleteResult(ele)}><DeleteOutlineIcon /></button></td>
-                                </tr>
+                            {!teacher && (
+                                <TextField
+                                    select
+                                    label="Teacher"
+                                    value={teacherId || ''}
+                                    onChange={(e) => setTeacherId(e.target.value)}
+                                >
+                                    {teachers?.map((ele) => (
+                                        <MenuItem key={ele.id} value={ele.id}>{ele.name}</MenuItem>
+                                    ))}
+                                </TextField>
                             )}
-                        </tbody>
-                    </table>
-                </div>
 
+                            <FormControlLabel
+                                sx={{ alignSelf: 'center' }}
+                                control={
+                                    <Switch
+                                        checked={Boolean(releaseResult)}
+                                        onChange={() => setReleaseResult(!releaseResult)}
+                                    />
+                                }
+                                label="Release results to students"
+                            />
+                        </Box>
+                    </Card>
 
-                <div className='create-quiz-bottom-div'>
+                    <DataTable
+                        caption="Results"
+                        columns={resultColumns}
+                        rows={result}
+                        getRowKey={(row, i) => row.id ?? i}
+                        empty={<EmptyState title="No submissions yet" />}
+                    />
 
-                    {question?.map((ele, i) =>
+                    <Box>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1.5 }}>
+                            <Typography variant="h5" component="h2">
+                                Questions
+                                <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                                    {question?.length || 0}
+                                </Typography>
+                            </Typography>
+                            <Button
+                                size="small"
+                                variant="outlined"
+                                color="inherit"
+                                startIcon={<AddIcon />}
+                                onClick={NoQuestionAdd}
+                                sx={{ bgcolor: 'background.paper' }}
+                            >
+                                Add question
+                            </Button>
+                        </Stack>
 
-                        <div key={i} className='create-quiz-question-div'>
-                            <div>
-
-                                <label >{ele.serialNo}.</label>
-                                {/* <label htmlFor="question">Question </label> */}
-                                <input type="text" id="name" className="question-input" name="name" value={ele.question} onChange={(e) => setQuestion((prev) =>
-                                    prev.map((ele, j) => i === j ? { ...ele, question: e.target.value } : ele))} />
-                            </div>
-                            <div>
-
-                                <label htmlFor="option1">option 1 </label>
-                                <input type="text" id="option1" name="option1" value={ele.option1} onChange={(e) => setQuestion((prev) =>
-                                    prev.map((ele, j) => i === j ? { ...ele, option1: e.target.value } : ele))} />
-                            </div>
-                            <div>
-
-                                <label htmlFor="option2">option 2 </label>
-                                <input type="text" id="option2" name="option2" value={ele.option2} onChange={(e) => setQuestion((prev) =>
-                                    prev.map((ele, j) => i === j ? { ...ele, option2: e.target.value } : ele))} />
-                            </div>
-                            <div>
-
-                                <label htmlFor="option3">option 3 </label>
-                                <input type="text" id="option3" name="option3" value={ele.option3} onChange={(e) => setQuestion((prev) =>
-                                    prev.map((ele, j) => i === j ? { ...ele, option3: e.target.value } : ele))} />
-                            </div>
-                            <div>
-
-                                <label htmlFor="option4">option 4 </label>
-                                <input type="text" id="option4" name="option4" value={ele.option4} onChange={(e) => setQuestion((prev) =>
-                                    prev.map((ele, j) => i === j ? { ...ele, option4: e.target.value } : ele))} />
-                            </div>
-                            <div>
-
-                                <label htmlFor="answer">answer </label>
-                                <input type="text" id="answer" name="answer" value={ele.answer} onChange={(e) => setQuestion((prev) =>
-                                    prev.map((ele, j) => i === j ? { ...ele, answer: e.target.value } : ele))} />
-                            </div>
-                        </div>
-
-                    )}
-                </div>
-
-                <button onClick={submit} className='submitBtn'> Save</button>
-
-
-
-            </div>}
-
-        </div >
+                        <Stack spacing={2}>
+                            {question?.map((ele, i) => (
+                                <QuestionEditor
+                                    key={i}
+                                    index={i}
+                                    value={ele}
+                                    onChange={updateQuestion}
+                                    onDelete={deleteQuestion}
+                                />
+                            ))}
+                        </Stack>
+                    </Box>
+                </Stack>
+            </DetailDialog>
+        </Box>
     )
 }
 

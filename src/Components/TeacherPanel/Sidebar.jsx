@@ -1,70 +1,41 @@
-import React, { useEffect } from 'react'
-import "../AdminPanel/Sidebar/Sidebar.css"
+import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
+import ViewListOutlinedIcon from '@mui/icons-material/ViewListOutlined'
+import PanelSidebar from '../Layout/PanelSidebar'
+import { useShell } from '../Layout/ShellContext'
 
-const Sidebar = ({ sidebarFunc }) => {
+const sections = [
+    {
+        label: 'Quizzes',
+        items: [
+            { id: 'CreateQuiz', label: 'Create quiz', icon: <AddOutlinedIcon fontSize="small" /> },
+            { id: 'EditQuiz', label: 'Edit quiz', icon: <EditOutlinedIcon fontSize="small" /> },
+            { id: 'SeeAllQuiz', label: 'All quizzes', icon: <ViewListOutlinedIcon fontSize="small" /> },
+        ],
+    },
+    {
+        label: 'Rooms',
+        items: [
+            { id: 'CreateRoom', label: 'Create room', icon: <AddOutlinedIcon fontSize="small" /> },
+            { id: 'EditRoom', label: 'Edit room', icon: <EditOutlinedIcon fontSize="small" /> },
+            { id: 'SeeAllRoom', label: 'All rooms', icon: <ViewListOutlinedIcon fontSize="small" /> },
+        ],
+    },
+]
 
+const Sidebar = () => {
     const navigate = useNavigate()
     const { teacherId, id } = useParams()
-    let routes = {
-        1: "CreateQuiz",
-        2: "EditQuiz",
-        3: "SeeAllQuiz",
+    const { closeSidebar } = useShell()
 
-
-        4: "CreateRoom",
-        5: "EditRoom",
-        6: "SeeAllRoom"
-
-    }
-    let routes2 = {
-        "CreateQuiz": 1,
-        "EditQuiz": 2,
-        "SeeAllQuiz": 3,
-
-        "CreateRoom": 4,
-        "EditRoom": 5,
-        "SeeAllRoom": 6
-
-    }
-    function checkSidebarColor(r) {
-
-        for (let i = 0; i < document.getElementsByClassName("sidebarBtn").length; i++) {
-            if (i === (r - 1)) {
-                document.getElementsByClassName("sidebarBtn")[i].style.backgroundColor = "rgb(255, 255, 255)"
-                document.getElementsByClassName("sidebarBtn")[i].style.color = " rgb(23, 44, 44)"
-
-            } else {
-                document.getElementsByClassName("sidebarBtn")[i].style.backgroundColor = " #308C99"
-                document.getElementsByClassName("sidebarBtn")[i].style.color = " rgb(255, 255, 255)"
-            }
-        }
+    const select = (route) => {
+        closeSidebar()
+        navigate(`/teacher/${teacherId}/${route}`)
     }
 
-    const routeChange = (r) => {
-        sidebarFunc()
-        checkSidebarColor(r)
-        navigate(`/teacher/${teacherId}/${routes[r]}`)
-    }
-    useEffect(() => {
-
-        checkSidebarColor(routes2[id])
-        // eslint-disable-next-line
-    }, [])
-
-    return (
-        <div className='sidebar-main'>
-            <button className="sidebarBtn" onClick={() => routeChange(1)}>Create Quiz</button>
-            <button className="sidebarBtn" onClick={() => routeChange(2)}>Edit Quiz</button>
-            <button className="sidebarBtn" onClick={() => routeChange(3)}>See All Quiz</button>
-
-
-            <button className="sidebarBtn" onClick={() => routeChange(4)}>Create Room</button>
-            <button className="sidebarBtn" onClick={() => routeChange(5)}>Edit Room</button>
-            <button className="sidebarBtn" onClick={() => routeChange(6)}>See All Room</button>
-
-        </div>
-    )
+    return <PanelSidebar sections={sections} activeId={id} onSelect={select} />
 }
 
 export default Sidebar

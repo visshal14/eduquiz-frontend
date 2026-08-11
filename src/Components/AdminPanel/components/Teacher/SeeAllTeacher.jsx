@@ -1,128 +1,113 @@
 import React, { useEffect, useState } from 'react'
+import { Box, Button, Stack } from '@mui/material'
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import axios from "../../../../axios"
-import { Close } from '@mui/icons-material'
+import { PageHeader, DataTable, DetailDialog, EmptyState, useFeedback } from '../../../ui'
+
 const SeeAllTeacher = () => {
+    const notify = useFeedback()
     const [teacher, setTeacher] = useState([])
-    const [detailedTeacher, setDetailedTeacher] = useState()
+    const [loading, setLoading] = useState(true)
+    const [detailedTeacher, setDetailedTeacher] = useState(null)
+
     useEffect(() => {
         axios.get("/getAllTeacher").then((response) => {
-
-            if (response.data.errMsg) return alert("Error")
+            setLoading(false)
+            if (response.data.errMsg) return notify("Could not load teachers.", "error")
             setTeacher(response.data)
         })
+        // eslint-disable-next-line
     }, [])
 
+    const startLink = (meetingId) => {
+        window.location.href = `/conference/${meetingId}/hello`
+    }
 
-    const getDetails = (ele) => {
-        setDetailedTeacher(ele)
-        // console.log(ele)
-    }
-    const startLink = (ele) => {
-        window.location.href = `/conference/${ele}/hello`
-    }
-    const closeBtn = () => {
-        setDetailedTeacher(null)
-    }
+    const columns = [
+        { key: 'id', label: 'ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'email', label: 'Email' },
+        { key: 'quizes', label: 'Quizzes', align: 'right', render: (row) => row.quizes.length },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Button size="small" variant="outlined" color="inherit" onClick={() => setDetailedTeacher(row)}>
+                    Details
+                </Button>
+            ),
+        },
+    ]
+
+    const quizColumns = [
+        { key: 'quizId', label: 'Quiz ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'total', label: 'Questions', align: 'right', render: (row) => row.question.length },
+        { key: 'no_of_question_to_attempt', label: 'To attempt', align: 'right' },
+        { key: 'attempted', label: 'Submissions', align: 'right', render: (row) => row.result.length },
+    ]
+
+    const roomColumns = [
+        { key: 'meeting_id', label: 'Meeting ID', nowrap: true },
+        { key: 'name', label: 'Name', render: (row) => row.name || '—' },
+        { key: 'password', label: 'Password', render: (row) => row.password || '—' },
+        { key: 'time', label: 'Time' },
+        { key: 'date', label: 'Date' },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Button
+                    size="small"
+                    variant="outlined"
+                    color="inherit"
+                    startIcon={<VideocamOutlinedIcon />}
+                    onClick={() => startLink(row.meeting_id)}
+                >
+                    Join
+                </Button>
+            ),
+        },
+    ]
 
     return (
-        <div className='seeQuiz-main'>
-            <table>
-                <thead>
-                    <tr className='editQuiz-table-head'>
-                        <th>Id</th>
-                        <th>Name</th>
+        <Box>
+            <PageHeader title="All teachers" subtitle="Every teacher account, their quizzes and their rooms." />
 
-                        {/* <th>question</th> */}
-                        <th>Email</th>
-                        <th>Quizzes</th>
-                    </tr>
+            <DataTable
+                columns={columns}
+                rows={teacher}
+                loading={loading}
+                getRowKey={(row) => row.id}
+                empty={<EmptyState title="No teachers yet" description="Add one from the Create teacher screen." />}
+            />
 
-                </thead>
-                <tbody>
-
-                    {teacher?.map((ele, i) =>
-
-                        <tr key={i}>
-                            <td>{ele.id}</td>
-                            <td>{ele.name}</td>
-
-                            {/* <td>{ele.questions}</td> */}
-                            <td>{ele.email}</td>
-                            <td>{ele.quizes.length}</td>
-                            <td><button onClick={() => getDetails(ele)}>Get Details</button></td>
-
-                        </tr>
-
-                    )}
-
-                </tbody>
-            </table>
-
-            {detailedTeacher &&
-
-                <div className='edit-quiz-overlay'>
-
-                    <div><Close onClick={closeBtn} className='close-btn' /></div>
-                    <div className='see-all-details'>
-
-                        <div className='see-all-students'><span>Quizzes</span>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Quiz id</th>
-                                        <th>Quiz name</th>
-                                        <th>No of Question</th>
-                                        <th>Question to attempt</th>
-                                        <th>Students Attempted</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedTeacher?.quizes.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.quizId}</td>
-                                            <td>{ele.name}</td>
-                                            <td>{ele.question.length}</td>
-                                            <td>{ele.no_of_question_to_attempt}</td>
-                                            <td>{ele.result.length}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className='see-all-students'><span>Room Meeting</span>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Meet id</th>
-                                        <th>Meet name</th>
-                                        <th>Password</th>
-                                        <th>Time</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedTeacher?.room.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.meeting_id}</td>
-                                            <td>{ele.name}</td>
-                                            <td>{ele.password}</td>
-                                            <td>{ele.time}</td>
-                                            <td>{ele.date}</td>
-                                            <td><button onClick={() => startLink(ele.meeting_id)}>Join</button></td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-            }
-
-        </div>
+            <DetailDialog
+                open={Boolean(detailedTeacher)}
+                onClose={() => setDetailedTeacher(null)}
+                title={detailedTeacher?.name || 'Teacher'}
+                subtitle={detailedTeacher?.email}
+            >
+                <Stack spacing={3}>
+                    <DataTable
+                        caption="Quizzes"
+                        columns={quizColumns}
+                        rows={detailedTeacher?.quizes}
+                        getRowKey={(row) => row.quizId}
+                        empty={<EmptyState title="No quizzes" />}
+                    />
+                    <DataTable
+                        caption="Meeting rooms"
+                        columns={roomColumns}
+                        rows={detailedTeacher?.room}
+                        getRowKey={(row) => row.meeting_id}
+                        empty={<EmptyState title="No rooms" />}
+                    />
+                </Stack>
+            </DetailDialog>
+        </Box>
     )
 }
 

@@ -1,20 +1,25 @@
 import React, { useEffect, useState } from 'react'
+import { Box, Button, Stack } from '@mui/material'
 import axios from "../../../../axios"
-import { Close } from '@mui/icons-material'
+import { PageHeader, DataTable, DetailDialog, EmptyState, useFeedback } from '../../../ui'
+
 const SeeAllStudent = () => {
+    const notify = useFeedback()
     const [student, setStudent] = useState([])
-    const [detailedStudent, setDetailedStudent] = useState()
+    const [loading, setLoading] = useState(true)
+    const [detailedStudent, setDetailedStudent] = useState(null)
 
     useEffect(() => {
         axios.get("/getAllStudent").then((response) => {
-            // console.log(response.data)
-            if (response.data.errMsg) return alert("Error")
+            setLoading(false)
+            if (response.data.errMsg) return notify("Could not load students.", "error")
             setStudent(response.data)
-            // console.log(response.data)
         })
+        // eslint-disable-next-line
     }, [])
-    const getDetails = (ele) => {
 
+    // Each quiz carries every student's result; flatten it down to this one's.
+    const getDetails = (ele) => {
         let temp = ele
         // eslint-disable-next-line
         temp.quizes.map((e, i) => {
@@ -26,111 +31,82 @@ const SeeAllStudent = () => {
                     }
                 })
             }
-        }
-        )
-        // console.log(ele)
+        })
         setDetailedStudent(ele)
-        // console.log(ele)
     }
-    const closeBtn = () => {
-        setDetailedStudent(null)
-    }
+
+    const columns = [
+        { key: 'id', label: 'ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'email', label: 'Email' },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Button size="small" variant="outlined" color="inherit" onClick={() => getDetails(row)}>
+                    Details
+                </Button>
+            ),
+        },
+    ]
+
+    const quizColumns = [
+        { key: 'quizId', label: 'Quiz ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'no_of_question_to_attempt', label: 'Questions', align: 'right' },
+        {
+            key: 'result',
+            label: 'Result',
+            align: 'right',
+            render: (row) => (row.result?.[0]?.student ? '' : row.result ? row.result : '—'),
+        },
+    ]
+
+    const roomColumns = [
+        { key: 'meeting_id', label: 'Meeting ID', nowrap: true },
+        { key: 'name', label: 'Name', render: (row) => row.name || '—' },
+        { key: 'password', label: 'Password', render: (row) => row.password || '—' },
+        { key: 'time', label: 'Time' },
+        { key: 'date', label: 'Date' },
+    ]
+
     return (
-        <div className='seeQuiz-main'>
-            <table>
-                <thead>
-                    <tr className='editQuiz-table-head'>
-                        <th>Id</th>
-                        <th>Name</th>
+        <Box>
+            <PageHeader title="All students" subtitle="Every student account, their quizzes and their rooms." />
 
-                        {/* <th>question</th> */}
-                        <th>Email</th>
+            <DataTable
+                columns={columns}
+                rows={student}
+                loading={loading}
+                getRowKey={(row) => row.id}
+                empty={<EmptyState title="No students yet" description="Add one from the Create student screen." />}
+            />
 
-
-
-                    </tr>
-
-                </thead>
-                <tbody>
-
-                    {student && student?.map((ele, i) =>
-
-                        <tr key={i}>
-                            <td>{ele.id}</td>
-                            <td>{ele.name}</td>
-
-                            {/* <td>{ele.questions}</td> */}
-                            <td>{ele.email}</td>
-                            <td><button onClick={() => getDetails(ele)}>Get Details</button></td>
-
-                        </tr>
-
-                    )}
-
-                </tbody>
-            </table>
-            {detailedStudent &&
-                <div className='edit-quiz-overlay'>
-                    <div><Close onClick={closeBtn} className='close-btn' /></div>
-                    <div className='see-all-details'>
-
-                        <div className='see-all-students'><span>Quizzes</span>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Quiz id</th>
-                                        <th>Quiz name</th>
-                                        <th>No of Question</th>
-                                        <th>Result</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedStudent?.quizes.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.quizId}</td>
-                                            <td>{ele.name}</td>
-                                            <td>{ele.no_of_question_to_attempt}</td>
-                                            <td>{ele.result[0]?.student ? "" : ele.result ? ele.result : ""}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div className='see-all-students'><span>Room Meeting</span>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Meet id</th>
-                                        <th>Meet name</th>
-                                        <th>Password</th>
-                                        <th>Time</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedStudent?.room.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.meeting_id}</td>
-                                            <td>{ele.name}</td>
-                                            <td>{ele.password}</td>
-                                            <td>{ele.time}</td>
-                                            <td>{ele.date}</td>
-                                            {/* <td><button onClick={() => startLink(ele.meeting_id)}>Join</button></td> */}
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-            }
-
-        </div>
+            <DetailDialog
+                open={Boolean(detailedStudent)}
+                onClose={() => setDetailedStudent(null)}
+                title={detailedStudent?.name || 'Student'}
+                subtitle={detailedStudent?.email}
+            >
+                <Stack spacing={3}>
+                    <DataTable
+                        caption="Quizzes"
+                        columns={quizColumns}
+                        rows={detailedStudent?.quizes}
+                        getRowKey={(row) => row.quizId}
+                        empty={<EmptyState title="No quizzes assigned" />}
+                    />
+                    <DataTable
+                        caption="Meeting rooms"
+                        columns={roomColumns}
+                        rows={detailedStudent?.room}
+                        getRowKey={(row) => row.meeting_id}
+                        empty={<EmptyState title="No rooms" />}
+                    />
+                </Stack>
+            </DetailDialog>
+        </Box>
     )
 }
 
