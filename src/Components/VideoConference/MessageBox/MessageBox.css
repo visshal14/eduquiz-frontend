@@ -1,25 +1,35 @@
+/* Chat panel. Stacked with flexbox rather than the previous absolute
+   positioning, so the message list is the only thing that scrolls. */
+
 .msg_main {
+    --vc-raised: #1b1b21;
+    --vc-raised-2: #26262e;
+    --vc-line: #33333d;
+    --vc-muted: #a1a1ad;
+    --vc-accent: #4f46e5;
 
     height: 100%;
-    border-radius: 10px;
-    background-color: rgb(43, 45, 46);
-    padding: 15px;
-    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 
+    border-radius: 16px;
+    background-color: #16161b;
+    border: 1px solid var(--vc-line);
+    padding: 14px;
+    box-sizing: border-box;
+    min-height: 0;
 }
 
-.parti-main {
-    position: absolute;
-    max-height: 400px;
-    width: calc(100% - 30px);
-    border-radius: 10px;
-    overflow-y: scroll;
-    /* height: 0; */
-    top: 15px;
-    background-color: rgb(27, 26, 29);
-    /* max-width: 80%; */
-    padding: 15px;
+/* ---------------------------------------------------------- participants */
 
+.parti-main {
+    flex-shrink: 0;
+    max-height: 320px;
+    overflow-y: auto;
+    border-radius: 12px;
+    background-color: var(--vc-raised);
+    border: 1px solid var(--vc-line);
 }
 
 .parti-main::-webkit-scrollbar {
@@ -28,87 +38,190 @@
 
 .total-parti-main {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    width: 100%;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+
+    padding: 12px 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.total-parti-main .MuiSvgIcon-root {
+    font-size: 18px;
+    color: var(--vc-muted);
 }
 
 .list-parti {
-    border-radius: 10px;
-    background-color: rgb(46, 45, 48);
-    padding: 15px;
+    padding: 4px 8px 8px;
 }
 
 .single-parti {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    margin: 5px 0;
+    gap: 8px;
+
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background-color: var(--vc-raised-2);
+    margin-bottom: 4px;
 }
 
+.single-parti:last-child {
+    margin-bottom: 0;
+}
+
+.single-parti > p {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.single-parti > div {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.single-parti .MuiSvgIcon-root {
+    font-size: 16px;
+    color: var(--vc-muted);
+}
+
+.single-parti .MuiSvgIcon-root.is-off {
+    color: #dc2626;
+}
+
+.parti-you {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vc-muted);
+    margin-left: 6px;
+}
+
+/* -------------------------------------------------------------- messages */
 
 .msgs_box {
-    max-height: calc(100% - 100px);
-    height: auto;
-    overflow-y: scroll;
-    position: absolute;
-    bottom: 90px;
-    width: calc(100% - 30px);
-
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-right: 2px;
 }
 
 .msgs_box::-webkit-scrollbar {
     display: none;
 }
 
+.msgs_empty {
+    margin: auto;
+    font-size: 13px;
+    color: var(--vc-muted);
+    text-align: center;
+}
+
 .msg_box {
-    background-color: rgb(27, 26, 29);
-    max-width: 80%;
-    padding: 15px;
-    border-radius: 10px 10px 10px 0;
-    margin-top: 15px;
+    background-color: var(--vc-raised);
+    max-width: 85%;
+    padding: 10px 12px;
+    border-radius: 12px 12px 12px 2px;
+    align-self: flex-start;
+}
+
+/* Own messages sit on the right in the accent colour. */
+.msg_box.is-mine {
+    align-self: flex-end;
+    background-color: var(--vc-accent);
+    border-radius: 12px 12px 2px 12px;
 }
 
 .nameTime {
     display: flex;
     justify-content: space-between;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--vc-muted);
+}
+
+.msg_box.is-mine .nameTime {
+    color: rgba(255, 255, 255, 0.75);
 }
 
 .msgUser_div {
-    margin-top: 5px;
+    margin-top: 4px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    word-break: break-word;
 }
 
-
-
-
-
+/* -------------------------------------------------------------- composer */
 
 .writeMsg_box {
-    width: calc(100% - 30px);
-    background-color: rgb(27, 26, 29);
-    position: absolute;
-    bottom: 15px;
-    height: 50px;
-    border-radius: 5px;
-    padding: 5px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
+    gap: 8px;
+
+    background-color: var(--vc-raised);
+    border: 1px solid var(--vc-line);
+    border-radius: 12px;
+    padding: 6px 6px 6px 12px;
 }
 
-.writeMsg_box>input {
-    width: 80%;
-    height: 100%;
+.writeMsg_box > input {
+    flex: 1;
+    min-width: 0;
+    height: 36px;
+
+    font: inherit;
+    font-size: 13.5px;
+    color: #f8fafc;
     background-color: transparent;
-    padding: 0 5px;
-    color: white;
     border: transparent;
-    font-size: 15px;
+    outline: none;
 }
 
-.writeMsg_box>button {
-    background-color: #3f8dfd;
-    border: transparent;
-    border-radius: 5px;
-    padding: 10px;
+.writeMsg_box > input::placeholder {
+    color: var(--vc-muted);
+}
+
+.writeMsg_box > button {
     display: inline-flex;
-    justify-content: center;
     align-items: center;
-    margin-left: 20px;
+    justify-content: center;
+    flex-shrink: 0;
+
+    width: 36px;
+    height: 36px;
+    color: #fff;
+    background-color: var(--vc-accent);
+    border: transparent;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background-color 140ms ease, opacity 140ms ease;
+}
+
+.writeMsg_box > button:hover:not(:disabled) {
+    background-color: #4338ca;
+}
+
+.writeMsg_box > button:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+.writeMsg_box > button .MuiSvgIcon-root {
+    font-size: 18px;
 }

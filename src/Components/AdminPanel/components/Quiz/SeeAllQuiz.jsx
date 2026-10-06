@@ -1,186 +1,144 @@
 import React, { useEffect, useState } from 'react'
+import { Box, Button, Card, Chip, Stack, Typography } from '@mui/material'
 import axios from "../../../../axios"
-import "./SeeAllQuiz.css"
-import { Close } from '@mui/icons-material'
+import { PageHeader, DataTable, DetailDialog, EmptyState, questionColumns, useFeedback } from '../../../ui'
+
 const SeeAllQuiz = ({ teacher }) => {
+    const notify = useFeedback()
     const [quizes, setQuizes] = useState([])
+    const [loading, setLoading] = useState(true)
     const [detailedQuiz, setDetailedQuiz] = useState()
     const [detailedQuestionAttempted, setDetailedQuestionAttempted] = useState(null)
+
     useEffect(() => {
         axios.get(`/getAllQuiz/${teacher ? teacher : "all"}`).then((response) => {
-            if (response.data.errMsg) return alert("Error")
+            setLoading(false)
+            if (response.data.errMsg) return notify("Could not load quizzes.", "error")
             setQuizes(response.data)
         })
+        // eslint-disable-next-line
     }, [teacher])
 
+    const columns = [
+        { key: 'quizId', label: 'Quiz ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'owner', label: 'Teacher', render: (row) => row.owner?.name },
+        {
+            key: 'can_release_result',
+            label: 'Results',
+            render: (row) => (
+                <Chip
+                    size="small"
+                    label={row.can_release_result ? 'Released' : 'Held'}
+                    color={row.can_release_result ? 'success' : 'default'}
+                    variant={row.can_release_result ? 'filled' : 'outlined'}
+                />
+            ),
+        },
+        { key: 'questions', label: 'Questions', align: 'right', render: (row) => row.question.length },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Button size="small" variant="outlined" color="inherit" onClick={() => setDetailedQuiz(row)}>
+                    Details
+                </Button>
+            ),
+        },
+    ]
 
-    const getDetails = (ele) => {
-        setDetailedQuiz(ele)
-        // console.log(ele)
-    }
-    const closeBtn = () => {
-        setDetailedQuiz(null)
-    }
-    const getQuestionAttempted = (ele) => {
-        setDetailedQuestionAttempted(ele.questionAttempted)
-        console.log(ele)
-    }
-    const closeQuestionAttempted = () => {
-        setDetailedQuestionAttempted(null)
-    }
+    const resultColumns = [
+        { key: 'student', label: 'Student ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        {
+            key: 'result',
+            label: 'Marks',
+            align: 'right',
+            render: (row) => (
+                <Typography variant="body2" fontWeight={600}>
+                    {row.result} / {detailedQuiz?.no_of_question_to_attempt}
+                </Typography>
+            ),
+        },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Button
+                    size="small"
+                    variant="outlined"
+                    color="inherit"
+                    onClick={() => setDetailedQuestionAttempted(row.questionAttempted)}
+                >
+                    Answer key
+                </Button>
+            ),
+        },
+    ]
 
     return (
-        <div className='seeQuiz-main'>
-            <table>
-                <thead>
-                    <tr className='editQuiz-table-head'>
-                        <th>Quiz Id</th>
-                        <th>Quiz Name</th>
-                        <th>Teacher Name</th>
+        <Box>
+            <PageHeader title="All quizzes" subtitle="Every quiz, who owns it and how students did." />
 
-                        {/* <th>question</th> */}
-                        <th>Result Declared</th>
-                        <th>No Of Question</th>
-                        {/* <th>date</th> */}
-                        <th>&nbsp;</th>
-                        <th>&nbsp;</th>
+            <DataTable
+                columns={columns}
+                rows={quizes}
+                loading={loading}
+                getRowKey={(row) => row.quizId}
+                empty={<EmptyState title="No quizzes yet" description="Create one from the Create quiz screen." />}
+            />
 
-                    </tr>
+            {/* Quiz detail */}
+            <DetailDialog
+                open={Boolean(detailedQuiz)}
+                onClose={() => setDetailedQuiz(null)}
+                title={detailedQuiz?.name || 'Quiz'}
+                subtitle={detailedQuiz?.quizId ? `Quiz ID ${detailedQuiz.quizId}` : undefined}
+            >
+                <Stack spacing={3}>
+                    <Card sx={{ p: 3 }}>
+                        <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                            Assigned students
+                        </Typography>
+                        <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                            {detailedQuiz?.users || '—'}
+                        </Typography>
+                    </Card>
 
-                </thead>
-                <tbody>
-
-                    {quizes?.map((ele, i) =>
-
-                        <tr key={i}>
-                            <td>{ele.quizId}</td>
-                            <td>{ele.name}</td>
-                            <td>{ele.owner.name}</td>
-
-                            {/* <td>{ele.questions}</td> */}
-                            <td>{String(ele.can_release_result)}</td>
-                            <td>{ele.question.length}</td>
-                            {/* <td>{ele.date}</td> */}
-                            <td><button onClick={() => getDetails(ele)}>Get Details</button></td>
-                        </tr>
-
+                    {detailedQuiz?.result?.length > 0 && (
+                        <DataTable
+                            caption="Results"
+                            columns={resultColumns}
+                            rows={detailedQuiz.result}
+                            getRowKey={(row, i) => row.id ?? i}
+                        />
                     )}
 
-                </tbody>
-            </table>
+                    <DataTable
+                        caption="Questions"
+                        columns={questionColumns()}
+                        rows={detailedQuiz?.question}
+                        getRowKey={(row, i) => i}
+                    />
+                </Stack>
+            </DetailDialog>
 
-
-            {detailedQuestionAttempted &&
-                <div className='edit-quiz-overlay ' style={{ zIndex: 9 }}>
-
-                    <div><Close onClick={closeQuestionAttempted} className='close-btn' /></div>
-                    <div className='see-all-details'>
-
-                        <div className='see-all-students see-all-question '>
-
-
-                            <span>Question</span>
-                            <table>
-                                <thead>
-                                    <tr >
-                                        <th>Serial No</th>
-                                        <th>Question</th>
-                                        <th>Option 1</th>
-                                        <th>Option 2</th>
-                                        <th>Option 3</th>
-                                        <th>Option 4</th>
-                                        <th>Answer</th>
-                                        <th>Chosen Answer</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedQuestionAttempted?.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.questionNo}</td>
-                                            <td>{ele.question}</td>
-                                            <td>{ele.option1}</td>
-                                            <td>{ele.option2}</td>
-                                            <td>{ele.option3}</td>
-                                            <td>{ele.option4}</td>
-                                            <td>{ele.answer}</td>
-                                            <td>{ele.chosen}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-
-            {detailedQuiz &&
-                <div className='edit-quiz-overlay'>
-
-                    <div><Close onClick={closeBtn} className='close-btn' /></div>
-                    <div className='see-all-details'>
-                        <div className='see-all-students'><span>Students</span>
-                            <p> {detailedQuiz?.users}</p>
-                        </div>
-                        {detailedQuiz?.result.length > 0 && <div className='see-all-students'><span>Result</span>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Student id</th>
-                                        <th>Student name</th>
-                                        <th>Marks</th>
-                                        <th>Answer Key</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedQuiz?.result?.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.student}</td>
-                                            <td>{ele.name}</td>
-                                            <td>{ele.result} / {detailedQuiz?.no_of_question_to_attempt} </td>
-                                            <td><button onClick={() => getQuestionAttempted(ele)}>Get Details</button></td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>}
-                        <div className='see-all-students see-all-question '>
-
-
-                            <span>Question</span>
-                            <table>
-                                <thead>
-                                    <tr >
-                                        <th>Serial No</th>
-                                        <th>Question</th>
-                                        <th>Option 1</th>
-                                        <th>Option 2</th>
-                                        <th>Option 3</th>
-                                        <th>Option 4</th>
-                                        <th>Answer</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedQuiz?.question?.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.serialNo}</td>
-                                            <td>{ele.question}</td>
-                                            <td>{ele.option1}</td>
-                                            <td>{ele.option2}</td>
-                                            <td>{ele.option3}</td>
-                                            <td>{ele.option4}</td>
-                                            <td>{ele.answer}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-        </div>
+            {/* Per-student answer key, opened from the results table above */}
+            <DetailDialog
+                open={Boolean(detailedQuestionAttempted)}
+                onClose={() => setDetailedQuestionAttempted(null)}
+                title="Answer key"
+                subtitle="What this student chose, against the correct answer."
+            >
+                <DataTable
+                    columns={questionColumns({ numberKey: 'questionNo', withChosen: true })}
+                    rows={detailedQuestionAttempted}
+                    getRowKey={(row, i) => i}
+                />
+            </DetailDialog>
+        </Box>
     )
 }
 

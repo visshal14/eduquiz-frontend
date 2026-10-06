@@ -1,144 +1,100 @@
 import React, { useEffect, useState } from 'react'
+import { Box, Button, Stack } from '@mui/material'
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import axios from "../../../../axios"
-import { Close } from '@mui/icons-material'
+import { PageHeader, DataTable, DetailDialog, EmptyState, useFeedback } from '../../../ui'
+
 const SeeAllRoom = ({ teacher }) => {
+    const notify = useFeedback()
 
     const [room, setRoom] = useState()
-    const [detailedRoom, setDetailedRoom] = useState()
-
+    const [loading, setLoading] = useState(true)
+    const [detailedRoom, setDetailedRoom] = useState(null)
 
     useEffect(() => {
         axios.get(`/getAllRoom/${teacher ? teacher : "all"}`).then((response) => {
-            if (response.data.errMsg) return alert("Error")
+            setLoading(false)
+            if (response.data.errMsg) return notify('Could not load rooms.', 'error')
             setRoom(response.data)
         })
+        // eslint-disable-next-line
     }, [teacher])
 
-    const getDetails = (ele) => {
-        setDetailedRoom(ele)
+    const columns = [
+        { key: 'meeting_id', label: 'Meeting ID', nowrap: true },
+        { key: 'name', label: 'Name', render: (row) => row.name || '—' },
+        { key: 'teacher', label: 'Teacher', render: (row) => row.admin_details?.name || '—' },
+        { key: 'password', label: 'Password', render: (row) => row.password || '—' },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                    <Button
+                        size="small"
+                        variant="contained"
+                        startIcon={<VideocamOutlinedIcon />}
+                        onClick={() => { window.location.href = `/conference/${row.meeting_id}/hello` }}
+                    >
+                        Join
+                    </Button>
+                    <Button size="small" variant="outlined" color="inherit" onClick={() => setDetailedRoom(row)}>
+                        Details
+                    </Button>
+                </Stack>
+            ),
+        },
+    ]
 
-    }
+    const participantColumns = [
+        { key: 'id', label: 'ID', nowrap: true },
+        { key: 'name', label: 'Name' },
+        { key: 'email', label: 'Email' },
+    ]
 
-
-    const closeBtn = () => {
-        setDetailedRoom(null)
-    }
+    const chatColumns = [
+        { key: 'name', label: 'Name', nowrap: true },
+        { key: 'time', label: 'Time', nowrap: true },
+        { key: 'message', label: 'Message' },
+    ]
 
     return (
-        <div className='seeQuiz-main'>
-            <table>
-                <thead>
-                    <tr className='editQuiz-table-head'>
-                        <th>Meeting Id</th>
-                        <th>Name</th>
-                        <th>Teacher Name</th>
+        <Box>
+            <PageHeader title="All rooms" subtitle="Every meeting room, who was invited and what was said." />
 
-                        <th>Password</th>
-                        <th>Link</th>
+            <DataTable
+                columns={columns}
+                rows={room}
+                loading={loading}
+                getRowKey={(row) => row.meeting_id}
+                empty={<EmptyState title="No rooms yet" description="Create one from the Create room screen." />}
+            />
 
-
-                    </tr>
-
-                </thead>
-                <tbody>
-
-                    {room?.map((ele, i) =>
-
-                        <tr key={i}>
-                            <td>{ele.meeting_id}</td>
-                            <td>{ele.name || "-"}</td>
-                            <td>{ele.admin_details?.name}</td>
-
-
-
-
-                            <td>{ele.password || "-"}</td>
-
-                            <td><button onClick={() => { window.location.href = `/conference/${ele.meeting_id}/hello` }}>Join</button></td>
-                            <td><button onClick={() => getDetails(ele)}>Details</button></td>
-                        </tr>
-
-                    )}
-
-                </tbody>
-            </table>
-
-            {detailedRoom &&
-                <div className='edit-quiz-overlay'>
-                    <div><Close onClick={closeBtn} className='close-btn' /></div>
-
-                    <div className='seeQuiz-main'>
-                        <div className='see-all-students'><span>Names Of Student</span></div>
-                        <table>
-                            <thead>
-                                <tr className='editQuiz-table-head'>
-                                    <th>Id</th>
-                                    <th>Name</th>
-
-
-                                    <th>Email</th>
-
-
-
-                                </tr>
-
-                            </thead>
-                            <tbody>
-
-                                {detailedRoom?.names_of_participants?.map((ele, i) =>
-
-                                    <tr key={i}>
-                                        <td>{ele.id}</td>
-                                        <td>{ele.name}</td>
-                                        <td>{ele.email}</td>
-
-
-                                    </tr>
-
-                                )}
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className='seeQuiz-main'>
-                        <div className='see-all-students'><span>Messages</span></div>
-                        <table>
-                            <thead>
-                                <tr className='editQuiz-table-head'>
-                                    <th>Name</th>
-                                    <th>Time</th>
-
-                                    {/* <th>question</th> */}
-                                    <th>Message</th>
-
-
-
-                                </tr>
-
-                            </thead>
-                            <tbody>
-
-                                {detailedRoom?.chat?.map((ele, i) =>
-
-                                    <tr key={i}>
-                                        <td>{ele.name}</td>
-                                        <td>{ele.time}</td>
-                                        <td>{ele.message}</td>
-
-
-                                    </tr>
-
-                                )}
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            }
-
-
-        </div>
+            <DetailDialog
+                open={Boolean(detailedRoom)}
+                onClose={() => setDetailedRoom(null)}
+                title={detailedRoom?.name || 'Room'}
+                subtitle={detailedRoom?.meeting_id ? `Meeting ID ${detailedRoom.meeting_id}` : undefined}
+            >
+                <Stack spacing={3}>
+                    <DataTable
+                        caption="Participants"
+                        columns={participantColumns}
+                        rows={detailedRoom?.names_of_participants}
+                        getRowKey={(row, i) => row.id ?? i}
+                        empty={<EmptyState title="Nobody invited yet" />}
+                    />
+                    <DataTable
+                        caption="Messages"
+                        columns={chatColumns}
+                        rows={detailedRoom?.chat}
+                        getRowKey={(row, i) => i}
+                        empty={<EmptyState title="No messages" description="Nothing was sent in this room's chat." />}
+                    />
+                </Stack>
+            </DetailDialog>
+        </Box>
     )
 }
 

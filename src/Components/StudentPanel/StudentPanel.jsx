@@ -1,223 +1,181 @@
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { Avatar, Box, Button, Card, Container, Stack, Typography } from '@mui/material'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined'
 import axios from "../../axios"
-import "./Student.css"
 import frontendUrl from '../../frontendUrl'
-import { Close } from '@mui/icons-material'
+import { PageHeader, DataTable, DetailDialog, EmptyState, questionColumns } from '../ui'
+
 const StudentPanel = () => {
     const { id } = useParams()
     const [details, setDetails] = useState()
-    // const [questionAttempted, setQuestionAttempted] = useState([])
+    const [loading, setLoading] = useState(true)
     const [detailedQuiz, setDetailedQuiz] = useState(null)
 
     useEffect(() => {
         if (id) {
-
             axios.get(`/getStudent/${id}`, { headers: { "Authorization": `Bearer ${window.localStorage.getItem("accessToken")}` } }).then((response) => {
-                // console.log(response.data)
+                setLoading(false)
                 if (response.data.errMsg) return window.location.href = "/student/login/0"
                 setDetails(response.data)
-
             })
         } else {
             axios.get("/isStudent", { headers: { "Authorization": `Bearer ${window.localStorage.getItem("accessToken")}` } }).then((response) => {
-                // console.log(response.data)
                 if (response.data.errMsg) {
                     return window.location.href = "/student/login/0"
                 }
-
                 window.location.href = `/student/${response.data}`
             })
         }
-
     }, [id])
-    const getDetails = (ele) => {
-        // setDetailedQuiz(ele)
-        // console.log(ele)
-        setDetailedQuiz(ele.result?.[0]?.questionAttempted)
 
-    }
-    // useEffect(() => {
-    //     console.log(detailedQuiz)
-    // }, [detailedQuiz])
-    const closeBtn = () => {
-        setDetailedQuiz(null)
-    }
+    const quizColumns = [
+        {
+            key: 'name',
+            label: 'Quiz',
+            render: (row) => <Typography variant="body2" fontWeight={600}>{row.name}</Typography>,
+        },
+        { key: 'date', label: 'Date', nowrap: true },
+        { key: 'time', label: 'Time', nowrap: true },
+        { key: 'owner', label: 'Teacher', render: (row) => row.owner?.name },
+        { key: 'no_of_question_to_attempt', label: 'Questions', align: 'right' },
+        {
+            key: 'result',
+            label: 'Result',
+            align: 'right',
+            render: (row) => (
+                <Typography variant="body2" fontWeight={600}>
+                    {row.result?.[0]?.result ?? '—'}
+                </Typography>
+            ),
+        },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => {
+                // Before results are released the quiz is still takeable;
+                // afterwards the answer key replaces the start button.
+                if (!row.can_release_result) {
+                    return (
+                        <Button
+                            size="small"
+                            variant="contained"
+                            startIcon={<PlayArrowIcon />}
+                            onClick={() => { window.location = `/takingQuiz/${row.quizId}` }}
+                        >
+                            Start
+                        </Button>
+                    )
+                }
+                if (row.result?.[0]?.questionAttempted) {
+                    return (
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            color="inherit"
+                            onClick={() => setDetailedQuiz(row.result[0].questionAttempted)}
+                        >
+                            Answer key
+                        </Button>
+                    )
+                }
+                return null
+            },
+        },
+    ]
+
+    const roomColumns = [
+        {
+            key: 'name',
+            label: 'Room',
+            render: (row) => <Typography variant="body2" fontWeight={600}>{row.name || '—'}</Typography>,
+        },
+        { key: 'date', label: 'Date', nowrap: true },
+        { key: 'time', label: 'Time', nowrap: true },
+        { key: 'meeting_id', label: 'Meeting ID', nowrap: true },
+        { key: 'teacher', label: 'Teacher', render: (row) => row.admin_details?.name },
+        { key: 'password', label: 'Password', render: (row) => row.password || '—' },
+        {
+            key: 'actions',
+            label: '',
+            align: 'right',
+            render: (row) => (
+                <Button
+                    size="small"
+                    variant="contained"
+                    startIcon={<VideocamOutlinedIcon />}
+                    href={`${frontendUrl}/conference/${row.meeting_id}/hello`}
+                    rel="noreferrer"
+                    target="_blank"
+                >
+                    Join
+                </Button>
+            ),
+        },
+    ]
+
+    const initials = (details?.name || '?')
+        .split(' ')
+        .map((part) => part[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
 
     return (
-        <div className='student-main'>
-            <div className='student-div'>
-                <div>
-                    <p>Name</p>
-                    <div> {details?.name}</div>
-                </div>
-                <div>
-                    <p>Email</p>
-                    <div> {details?.email}</div>
-                </div>
-            </div>
+        <Box sx={{ flex: 1, bgcolor: 'background.default', py: { xs: 3, md: 5 } }}>
+            <Container maxWidth="lg">
+                <PageHeader title="Your dashboard" subtitle="Quizzes assigned to you and rooms you can join." />
 
+                <Card sx={{ p: 3, mb: 4 }}>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                        <Avatar sx={{ width: 52, height: 52, bgcolor: 'primary.main', fontWeight: 700 }}>
+                            {initials}
+                        </Avatar>
+                        <Box sx={{ minWidth: 0 }}>
+                            <Typography variant="h4" noWrap>{details?.name || '—'}</Typography>
+                            <Typography variant="body2" color="text.secondary" noWrap>
+                                {details?.email || '—'}
+                            </Typography>
+                        </Box>
+                    </Stack>
+                </Card>
 
-            <div className='see-all-students see-all-question '>
+                <Stack spacing={4}>
+                    <DataTable
+                        caption="Quizzes"
+                        columns={quizColumns}
+                        rows={details?.quizes}
+                        loading={loading}
+                        getRowKey={(row, i) => row.quizId ?? i}
+                        empty={<EmptyState title="No quizzes assigned" description="Your teacher hasn't set you anything yet." />}
+                    />
 
+                    <DataTable
+                        caption="Meeting rooms"
+                        columns={roomColumns}
+                        rows={details?.room}
+                        loading={loading}
+                        getRowKey={(row, i) => row.meeting_id ?? i}
+                        empty={<EmptyState title="No rooms" description="You haven't been invited to a live session." />}
+                    />
+                </Stack>
 
-                <span>Quizzes</span>
-                <table>
-                    <thead>
-                        <tr >
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Teacher Name</th>
-                            <th>No Of Question</th>
-                            <th>Result</th>
-                            {/* <th>Answer</th> */}
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {details?.quizes?.map((ele, i) =>
-                            <tr key={i}>
-                                <td>{ele.name}</td>
-                                <td>{ele.date}</td>
-                                <td>{ele.time}</td>
-                                <td>{ele.owner.name}</td>
-                                <td>{ele.no_of_question_to_attempt}</td>
-                                <td>{ele.result?.[0].result}</td>
-                                <td>
-                                    {!ele.can_release_result
-                                        ? <button onClick={() => window.location = `/takingQuiz/${ele.quizId}`}>Start</button>
-                                        :
-                                        ele.result?.[0]?.questionAttempted ? <button onClick={() => getDetails(ele)}>Answer Key</button> :
-                                            ""}
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {detailedQuiz &&
-                <div className='edit-quiz-overlay'>
-
-                    <div><Close onClick={closeBtn} className='close-btn' /></div>
-                    <div className='see-all-details'>
-                        {/* <div className='see-all-students'><span>Students</span>
-                            <p> {detailedQuiz?.users}</p>
-                        </div>
-                        {detailedQuiz?.result.length > 0 && <div className='see-all-students'><span>Result</span>
-
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Student id</th>
-                                        <th>Student name</th>
-                                        <th>Marks</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedQuiz?.result?.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.student}</td>
-                                            <td>{ele.name}</td>
-                                            <td>{ele.result} / {detailedQuiz?.no_of_question_to_attempt} </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>} */}
-                        <div className='see-all-students see-all-question '>
-
-
-                            <span>Question</span>
-                            <table>
-                                <thead>
-                                    <tr >
-                                        <th>Serial No</th>
-                                        <th>Question</th>
-                                        <th>Option 1</th>
-                                        <th>Option 2</th>
-                                        <th>Option 3</th>
-                                        <th>Option 4</th>
-                                        <th>Answer</th>
-                                        <th>Chosen Answer</th>
-
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detailedQuiz?.map((ele, i) =>
-                                        <tr key={i}>
-                                            <td>{ele.questionNo}</td>
-                                            <td>{ele.question}</td>
-                                            <td>{ele.option1}</td>
-                                            <td>{ele.option2}</td>
-                                            <td>{ele.option3}</td>
-                                            <td>{ele.option4}</td>
-                                            <td>{ele.answer}</td>
-                                            <td>{ele.chosen}</td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            }
-
-
-            <div className='see-all-students see-all-question student-room'>
-                <span>Meeting Room</span>
-                <table>
-                    <thead>
-                        <tr >
-                            <th>Name</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Id</th>
-                            <th>Teacher Name</th>
-                            <th>Password</th>
-
-
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {details?.room?.map((ele, i) =>
-                            <tr key={i}>
-                                <td>{ele.name}</td>
-                                <td>{ele.date}</td>
-                                <td>{ele.time}</td>
-                                <td>{ele.meeting_id}</td>
-                                <td>{ele.admin_details?.name}</td>
-                                <td>{ele.password}</td>
-                                <td> <a href={`${frontendUrl}/conference/${ele.meeting_id}/hello`} rel="noreferrer" target="_blank">Join</a></td>
-
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-            {/* <div>
-                <h3>List of Meeting</h3><br />
-                {details?.room?.map((ele, i) =>
-                    <div key={i}>
-                        <h1>Name: {ele.name}</h1>
-                        <h3>Date: {ele.date}</h3>
-                        <h3>Time:{ele.time}</h3>
-                        <h3>id:{ele.meeting_id}</h3>
-                        <h3>password:{ele.password}</h3>
-                       
-                        <h3>Teacher Name:{ele.owner?.name}</h3> 
-
-                        {!ele.result && <button onClick={() => window.location = `/takingQuiz/${ele.quizId}`}>Start</button>} 
-
-                    </div>
-                )}
-
-            </div> */}
-
-
-        </div>
+                <DetailDialog
+                    open={Boolean(detailedQuiz)}
+                    onClose={() => setDetailedQuiz(null)}
+                    title="Answer key"
+                    subtitle="What you chose, against the correct answer."
+                >
+                    <DataTable
+                        columns={questionColumns({ numberKey: 'questionNo', withChosen: true })}
+                        rows={detailedQuiz}
+                        getRowKey={(row, i) => i}
+                    />
+                </DetailDialog>
+            </Container>
+        </Box>
     )
 }
 

@@ -1,93 +1,130 @@
 import React, { useState, useEffect } from 'react'
+import {
+    Box, Button, IconButton, InputAdornment, MenuItem, TextField,
+} from '@mui/material'
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
+import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined'
 import axios from '../../../../axios'
+import { PageHeader, FormCard, FullWidth, useFeedback } from '../../../ui'
+
 const CreateRoom = ({ teacher }) => {
+    const notify = useFeedback()
+
     const [name, setName] = useState("")
     const [teachers, setTeachers] = useState([])
     const [teacherId, setTeacherId] = useState("")
     const [studentEmails, setStudentEmails] = useState("")
     const [password, setPassword] = useState("")
+    const [showPassword, setShowPassword] = useState(false)
+    const [submitting, setSubmitting] = useState(false)
+
     const submit = (e) => {
-        if (name === "" || teacherId === "") return
+        e.preventDefault()
+        if (name === "" || teacherId === "") {
+            return notify('Give the room a name and pick a teacher.', 'warning')
+        }
+
+        setSubmitting(true)
         axios.post(`/createRoom`, {
             name, teacherId, studentEmails, password
-
         }).then((response) => {
-            if (response.data.errMsg) return alert("Error")
-            // console.log(response.data)
+            setSubmitting(false)
+            if (response.data.errMsg) return notify('Could not create the room.', 'error')
 
             setName("")
             setStudentEmails("")
             setPassword("")
-            alert("success")
-
+            notify('Room created.', 'success')
         })
             .catch(function (error) {
                 console.log(error);
+                setSubmitting(false)
+                notify('Could not reach the server.', 'error')
             });
     }
+
     useEffect(() => {
-
-
         if (teacher) {
             setTeacherId(teacher)
         } else {
-
             axios.get("/getAllTeacher").then((response) => {
-                // console.log(response.data)
-                if (response.data.errMsg) return alert("Error")
+                if (response.data.errMsg) return notify('Could not load teachers.', 'error')
                 setTeachers(response.data)
-                setTeacherId(response.data[0].id)
+                setTeacherId(response.data[0]?.id || "")
             })
         }
-
-
+        // eslint-disable-next-line
     }, [teacher])
+
     return (
-        <div className='form-main'>
-            <div>
-                <div className='top-div'>
-                    <div>
-                        <label htmlFor="name">Name:</label>
-                        <input type="text" id="name" name="name" value={name} onChange={(e) => setName(e.target.value)} />
+        <Box component="form" onSubmit={submit} noValidate>
+            <PageHeader
+                title="Create room"
+                subtitle="Set up a live session and invite students by email."
+            />
 
-                    </div>
-                    <div>
-                        <label htmlFor="">Password (if dont want to add leave it blank) </label>
-                        <input type="password" id="password" name="" value={password} onChange={(e) => setPassword(e.target.value)} />
+            <FormCard
+                maxWidth={720}
+                footer={
+                    <Button type="submit" variant="contained" disabled={submitting}>
+                        {submitting ? 'Creating…' : 'Create room'}
+                    </Button>
+                }
+            >
+                <TextField
+                    label="Room name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
 
-                    </div>
-                    <div>
-                        <label htmlFor="">Enter Student Mail</label>
-                        <input type="text" id="student" name="" placeholder="separated by comma (,)" value={studentEmails} onChange={(e) => setStudentEmails(e.target.value)} />
-                    </div>
-                    {!teacher &&
-                        <div>
-                            <label htmlFor="">Select Teacher:</label>
-                            <select name="teacher" id="teacher" onChange={(e) => setTeacherId(e.target.value)}>
-                                {
-                                    teachers?.map((ele, i) =>
-                                        <option key={i} value={ele.id}>{ele.name}</option>
-                                    )
-                                }
+                <TextField
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    helperText="Optional — leave blank for an open room"
+                    InputProps={{
+                        endAdornment: (
+                            <InputAdornment position="end">
+                                <IconButton
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    edge="end"
+                                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                >
+                                    {showPassword
+                                        ? <VisibilityOffOutlinedIcon fontSize="small" />
+                                        : <VisibilityOutlinedIcon fontSize="small" />}
+                                </IconButton>
+                            </InputAdornment>
+                        ),
+                    }}
+                />
 
-                            </select>
-                        </div>}<br />
+                <FullWidth>
+                    <TextField
+                        label="Student emails"
+                        value={studentEmails}
+                        onChange={(e) => setStudentEmails(e.target.value)}
+                        placeholder="ana@school.edu, ben@school.edu"
+                        helperText="Separated by commas"
+                    />
+                </FullWidth>
 
-
-
-
-
-
-                </div>
-                <button onClick={submit} className='submitBtn'>submit</button>
-            </div>
-        </div>
+                {!teacher && (
+                    <TextField
+                        select
+                        label="Teacher"
+                        value={teacherId}
+                        onChange={(e) => setTeacherId(e.target.value)}
+                    >
+                        {teachers?.map((ele) => (
+                            <MenuItem key={ele.id} value={ele.id}>{ele.name}</MenuItem>
+                        ))}
+                    </TextField>
+                )}
+            </FormCard>
+        </Box>
     )
 }
-
-
-//email
-//password
-//teacher
 
 export default CreateRoom

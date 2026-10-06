@@ -1,27 +1,14 @@
+/* Video stage.
+
+   Layout rules here (sizes, flex, positioning, the top_div/bottom_div swap
+   targets) are load-bearing: NewVideos.jsx moves these nodes between
+   containers and writes inline maxWidth. Only the chrome is restyled. */
+
 .videos_main {
     width: 100%;
     height: 100%;
     display: flex;
     flex-wrap: wrap;
-}
-
-.bor-r {
-    border: 1px solid red;
-}
-
-.nav_logo>a {
-    font-size: 30px;
-    text-decoration: none;
-    color: rgb(0, 0, 0);
-}
-
-.nav_list_main>ul>li>a {
-    text-decoration: none;
-    color: rgb(0, 0, 0);
-}
-
-.bor-y {
-    border: 1px solid yellow;
 }
 
 #top_div {
@@ -45,45 +32,78 @@
     max-height: 100%;
 
     flex-wrap: wrap;
-    /* height: 100%;
-    width: 100%; */
     justify-content: center;
     display: flex;
-
+    gap: 10px;
 }
+
+/* --------------------------------------------------------- participant tile */
 
 .videoThumbnail {
     max-width: 70%;
     max-height: 70%;
 
     width: fit-content;
-    border-radius: 20px;
+    border-radius: 14px;
     position: relative;
     object-fit: contain;
+    overflow: hidden;
+    background-color: #1b1b21;
 }
 
 .videoThumbnail>video {
     height: fit-content;
     width: 100%;
     object-fit: contain;
-    border-radius: 20px;
+    border-radius: 14px;
     max-height: 300px;
+    display: block;
 }
 
 .videoThumbnail>p {
     position: absolute;
-    color: white;
-    bottom: 4px;
-    background-color: rgba(0, 0, 0, 0.4);
-    padding: 5px 0;
-    border-radius: 5px;
-    /* left: 42%; */
+    bottom: 0;
+    left: 0;
     width: 100%;
-    border-radius: 0 0 20px 20px;
 
-    text-align: center;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
 
+    padding: 18px 12px 8px;
+    box-sizing: border-box;
+    /* Scrim rather than a solid bar, so the name never fights the video. */
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75), transparent);
+    border-radius: 0 0 14px 14px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
+
+.myMicSpan {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
+    border-radius: 999px;
+}
+
+.myMicSpan .MuiSvgIcon-root {
+    font-size: 16px;
+}
+
+/* ------------------------------------------------------------ screen share */
 
 .screen-share-div {
     max-height: 100%;
@@ -95,7 +115,7 @@
     max-height: 100%;
     max-width: 100%;
     object-fit: contain;
-
+    border-radius: 14px;
 }
 
 .screen-share-div:hover .request-remote {
@@ -104,66 +124,108 @@
 
 .request-remote {
     position: absolute;
-    bottom: 10px;
-    right: 10px;
+    bottom: 12px;
+    right: 12px;
     display: none;
     align-items: center;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
     color: white;
-    padding: 5px 10px;
-    font-weight: 800;
-    border-radius: 10px;
-    background-color: #d95240;
+
+    padding: 8px 14px;
+    border-radius: 999px;
+    background-color: #4f46e5;
     border: transparent;
+    cursor: pointer;
+}
+
+.request-remote:hover {
+    background-color: #4338ca;
+}
+
+.screen-share-div>.screen-share-remote-access,
+.screen-share-name {
+    position: absolute;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+
+    padding: 6px 12px;
+    border-radius: 999px;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(6px);
 }
 
 .screen-share-div>.screen-share-remote-access {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: white;
+    top: 12px;
+    left: 12px;
 }
 
 .screen-share-name {
-
-    position: absolute;
-    bottom: 10px;
-    left: 10px;
-    color: white;
+    bottom: 12px;
+    left: 12px;
 }
+
+/* ------------------------------------------------- remote-control request */
 
 .request-div {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    padding: 20px;
-    border-radius: 10px;
-    background-color: rgba(41, 41, 41, 0.9);
+    width: min(440px, 90%);
 
+    padding: 24px;
+    border-radius: 16px;
+    background-color: rgba(27, 27, 33, 0.96);
+    border: 1px solid #33333d;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(12px);
 }
 
 .request-div>p {
-    color: white;
+    color: #f8fafc;
+    font-size: 15px;
+    text-align: center;
 }
 
 .request-div>div {
     width: 100%;
     display: flex;
+    gap: 12px;
     margin-top: 20px;
-    justify-content: space-around;
+    justify-content: center;
 }
 
 .request-div>div>button {
-
     display: flex;
     align-items: center;
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
     color: white;
-    padding: 10px 15px;
-    font-weight: 800;
-    border-radius: 5px;
-    background-color: #d95240;
+
+    padding: 9px 18px;
+    border-radius: 999px;
+    background-color: #4f46e5;
     border: transparent;
+    cursor: pointer;
+}
+
+.request-div>div>button:hover {
+    background-color: #4338ca;
+}
+
+/* The second button in the pair is the decline action. */
+.request-div>div>button:last-child {
+    background-color: #dc2626;
+}
+
+.request-div>div>button:last-child:hover {
+    background-color: #b91c1c;
 }
 
 .tempMouse {
@@ -176,40 +238,7 @@
     position: absolute;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-.myMicSpan {
-    position: absolute;
-    top: 0;
-    right: 0px;
-    padding: 10px;
-    background-color: rgba(0, 0, 0, 0.9);
-    margin: 10px;
-    border-radius: 60px;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+/* ------------------------------------------------- whiteboard / share slots */
 
 .whiteboardComp,
 .screenshareComp {
@@ -227,5 +256,4 @@
     top: 0;
     left: 0;
     z-index: 4;
-    /* background-color: rgba(0, 0, 0, 0.438); */
 }
